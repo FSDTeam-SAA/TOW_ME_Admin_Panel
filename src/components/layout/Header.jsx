@@ -18,8 +18,8 @@ export default function Header({ page, openMenu }) {
     <div className="title"><h1>{title}</h1><p>{subtitle}</p></div>
     <div className="top-actions">
       <button className="menu-btn" onClick={openMenu}><Menu /></button>
-      <button className="bell"><Bell size={19} /><span>3</span></button>
       <Avatar text="AC" color="#f16522" />
+      <button className="bell"><Bell size={19} /><span>3</span></button>
     </div>
   </header>
 }

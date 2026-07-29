@@ -23,7 +23,7 @@ export default function Sidebar({ page, setPage, open, setOpen }) {
 
   return <aside className={open ? 'sidebar sidebar--open' : 'sidebar'}>
     <button className="mobile-close" onClick={() => setOpen(false)} aria-label="Close"><X /></button>
-    <div className="logo"><span className="logo-pin">⌁</span><b>TOW ME</b><small>{t.panel}</small></div>
+    <div className="logo"><img src="/assets/dashboard_icon/logo.png?v=1" alt="TOW ME" /><small>{t.panel}</small></div>
     <div className="side-profile"><Avatar text="AC" color="#f16522" large /><div><b>{t.adminName}</b><span>{t.adminRole}</span></div></div>
     <nav>{t.nav.map((label, index) => {
       const Icon = icons[index]
