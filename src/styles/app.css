@@ -404,6 +404,1253 @@ main:has(.drivers-page) .topbar .title p { font-weight: 500; }
   .history-metrics { grid-template-columns:1fr }
 }
 
+/* Driver Management — reversible Neumorphism preview */
+main:has(.drivers-page) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #edf2f6;
+}
+main:has(.drivers-page)::before,
+main:has(.drivers-page)::after {
+  content: '';
+  position: fixed;
+  z-index: 0;
+  width: 430px;
+  height: 430px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(28px);
+}
+main:has(.drivers-page)::before {
+  top: 110px;
+  right: 185px;
+  background: radial-gradient(circle, rgba(21, 159, 190, .19) 0%, rgba(21, 159, 190, .07) 46%, transparent 72%);
+}
+main:has(.drivers-page)::after {
+  bottom: -120px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(242, 103, 34, .16) 0%, rgba(242, 103, 34, .055) 48%, transparent 72%);
+}
+main:has(.drivers-page) .topbar,
+main:has(.drivers-page) .drivers-page {
+  position: relative;
+  z-index: 1;
+}
+main:has(.drivers-page) .topbar {
+  background: rgba(237, 242, 246, .9);
+  border-bottom: 0;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 24px rgba(155, 170, 182, .34),
+    inset 0 -1px rgba(255, 255, 255, .7);
+}
+.drivers-page .panel {
+  border: 0;
+  background: rgba(237, 242, 246, .92);
+  backdrop-filter: blur(9px);
+  box-shadow:
+    15px 15px 30px rgba(157, 171, 183, .56),
+    -13px -13px 28px rgba(255, 255, 255, .96),
+    inset 1px 1px 0 rgba(255, 255, 255, .75);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.drivers-page .driver-metrics article:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    18px 18px 34px rgba(157, 171, 183, .58),
+    -15px -15px 31px rgba(255, 255, 255, .98),
+    inset 1px 1px 0 rgba(255, 255, 255, .82);
+}
+.drivers-page .driver-metrics article {
+  border-radius: 20px;
+}
+.drivers-page .driver-metric-icon {
+  background: #edf2f6;
+  box-shadow:
+    inset 5px 5px 10px rgba(158, 173, 185, .43),
+    inset -5px -5px 10px rgba(255, 255, 255, .96),
+    0 5px 12px rgba(131, 151, 166, .12);
+}
+.drivers-page .driver-toolbar {
+  border-radius: 18px;
+}
+.drivers-page .driver-toolbar label {
+  border: 0;
+  background: #edf2f6;
+  box-shadow:
+    inset 6px 6px 12px rgba(158, 173, 185, .45),
+    inset -6px -6px 12px rgba(255, 255, 255, .96);
+}
+.drivers-page .driver-toolbar .outline {
+  border: 0;
+  background: #edf2f6;
+  box-shadow:
+    8px 8px 16px rgba(157, 171, 183, .5),
+    -7px -7px 15px rgba(255, 255, 255, .96);
+}
+.drivers-page .driver-toolbar .outline:active {
+  box-shadow:
+    inset 3px 3px 7px rgba(174, 187, 198, .4),
+    inset -3px -3px 7px rgba(255, 255, 255, .88);
+}
+.drivers-page .driver-toolbar .add-driver {
+  box-shadow:
+    8px 8px 18px rgba(194, 86, 32, .34),
+    -7px -7px 16px rgba(255, 255, 255, .9),
+    inset 0 1px rgba(255, 255, 255, .24);
+}
+.drivers-page .full-drivers-table {
+  border-radius: 20px;
+}
+.drivers-page .full-drivers-head,
+.drivers-page .driver-table-footer {
+  border-color: rgba(176, 188, 199, .24);
+}
+.drivers-page .full-drivers-table th {
+  background: rgba(229, 235, 240, .72);
+}
+.drivers-page .full-drivers-table td {
+  border-color: rgba(176, 188, 199, .22);
+  background: #edf2f6;
+}
+.drivers-page .full-drivers-table tbody tr:nth-child(even) td {
+  background: #e9eef2;
+}
+.drivers-page .full-drivers-table tbody tr:hover td {
+  background: rgba(246, 249, 251, .96);
+  box-shadow:
+    inset 0 7px 12px rgba(255, 255, 255, .62),
+    inset 0 -5px 10px rgba(170, 184, 195, .12);
+}
+.drivers-page .vehicle-badge,
+.drivers-page .driver-status,
+.drivers-page mark {
+  box-shadow:
+    inset 2px 2px 4px rgba(168, 180, 190, .25),
+    inset -2px -2px 4px rgba(255, 255, 255, .75);
+}
+.drivers-page .details,
+.drivers-page .lock,
+.drivers-page .driver-pagination button {
+  border: 0;
+  box-shadow:
+    6px 6px 12px rgba(157, 171, 183, .48),
+    -6px -6px 12px rgba(255, 255, 255, .94);
+}
+.drivers-page .driver-pagination button:not(.current) {
+  background: #edf2f6;
+}
+.drivers-page .driver-pagination .current {
+  box-shadow:
+    4px 4px 9px rgba(194, 86, 32, .3),
+    -4px -4px 8px rgba(255, 255, 255, .82);
+}
+.driver-modal {
+  background: #edf2f6;
+  box-shadow:
+    14px 14px 30px rgba(36, 55, 70, .24),
+    -10px -10px 25px rgba(255, 255, 255, .75);
+}
+.driver-modal input {
+  border: 0;
+  background: #edf2f6;
+  box-shadow:
+    inset 4px 4px 8px rgba(174, 187, 198, .4),
+    inset -4px -4px 8px rgba(255, 255, 255, .88);
+}
+
+/* Dashboard — deep Neumorphism, layout preserved */
+main:has(.dashboard-page) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #edf2f6;
+}
+main:has(.dashboard-page)::before,
+main:has(.dashboard-page)::after {
+  content: '';
+  position: fixed;
+  z-index: 0;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(30px);
+}
+main:has(.dashboard-page)::before {
+  top: 100px;
+  right: 170px;
+  background: radial-gradient(circle, rgba(21, 159, 190, .18) 0%, rgba(21, 159, 190, .065) 48%, transparent 73%);
+}
+main:has(.dashboard-page)::after {
+  bottom: -130px;
+  left: -90px;
+  background: radial-gradient(circle, rgba(242, 103, 34, .15) 0%, rgba(242, 103, 34, .05) 48%, transparent 73%);
+}
+main:has(.dashboard-page) .topbar,
+main:has(.dashboard-page) .dashboard-page {
+  position: relative;
+  z-index: 1;
+}
+main:has(.dashboard-page) .topbar {
+  border-bottom: 0;
+  background: rgba(237, 242, 246, .9);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 24px rgba(155, 170, 182, .34),
+    inset 0 -1px rgba(255, 255, 255, .72);
+}
+.dashboard-page .panel,
+.dashboard-page .stats article {
+  border: 0;
+  background: rgba(237, 242, 246, .92);
+  backdrop-filter: blur(9px);
+  box-shadow:
+    15px 15px 30px rgba(157, 171, 183, .54),
+    -13px -13px 28px rgba(255, 255, 255, .96),
+    inset 1px 1px 0 rgba(255, 255, 255, .76);
+}
+.dashboard-page .stats article {
+  border-radius: 20px;
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.dashboard-page .stats article:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    18px 18px 34px rgba(157, 171, 183, .58),
+    -15px -15px 31px rgba(255, 255, 255, .98),
+    inset 1px 1px 0 rgba(255, 255, 255, .82);
+}
+.dashboard-page .metric-icon,
+.dashboard-page .activity-icon {
+  box-shadow:
+    inset 5px 5px 10px rgba(158, 173, 185, .4),
+    inset -5px -5px 10px rgba(255, 255, 255, .94),
+    0 5px 12px rgba(131, 151, 166, .1);
+}
+.dashboard-page .tabs,
+.dashboard-page .filters label {
+  border: 0;
+  background: #edf2f6;
+  box-shadow:
+    inset 5px 5px 10px rgba(158, 173, 185, .42),
+    inset -5px -5px 10px rgba(255, 255, 255, .94);
+}
+.dashboard-page .tabs .selected {
+  box-shadow:
+    4px 4px 9px rgba(194, 86, 32, .17),
+    -4px -4px 8px rgba(255, 255, 255, .84);
+}
+.dashboard-page .revenue-panel,
+.dashboard-page .pie-panel {
+  overflow: hidden;
+}
+.dashboard-page .line-chart {
+  margin-top: 7px;
+  padding-inline: 8px;
+  border-radius: 15px;
+  background: rgba(232, 238, 243, .68);
+  box-shadow:
+    inset 7px 7px 14px rgba(157, 172, 184, .34),
+    inset -7px -7px 14px rgba(255, 255, 255, .84);
+}
+.dashboard-page .line-chart svg {
+  filter: drop-shadow(0 5px 7px rgba(32, 73, 98, .08));
+}
+.dashboard-page .line-chart .grid-line {
+  stroke: rgba(142, 159, 172, .2);
+}
+.dashboard-page .line-chart .area {
+  fill: rgba(242, 103, 34, .095);
+}
+.dashboard-page .line-chart .orange-line {
+  filter: drop-shadow(0 3px 4px rgba(242, 103, 34, .28));
+}
+.dashboard-page .line-chart .blue-line {
+  filter: drop-shadow(0 2px 3px rgba(18, 147, 187, .23));
+}
+.dashboard-page .pie-wrap {
+  margin: 2px auto 0;
+  padding: 12px 10px 9px;
+  border-radius: 18px;
+  background: rgba(232, 238, 243, .62);
+  box-shadow:
+    inset 7px 7px 14px rgba(157, 172, 184, .32),
+    inset -7px -7px 14px rgba(255, 255, 255, .84);
+}
+.dashboard-page .pie {
+  border: 5px solid rgba(237, 242, 246, .82);
+  box-shadow:
+    8px 8px 16px rgba(148, 164, 177, .48),
+    -8px -8px 16px rgba(255, 255, 255, .92),
+    inset 3px 3px 7px rgba(34, 66, 88, .16),
+    inset -3px -3px 7px rgba(255, 255, 255, .16);
+}
+.dashboard-page .legend span {
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: #edf2f6;
+  box-shadow:
+    3px 3px 7px rgba(157, 172, 184, .35),
+    -3px -3px 7px rgba(255, 255, 255, .86);
+}
+.dashboard-page .filters .outline,
+.dashboard-page .details,
+.dashboard-page .lock,
+.dashboard-page .pagination button {
+  border: 0;
+  box-shadow:
+    6px 6px 12px rgba(157, 171, 183, .46),
+    -6px -6px 12px rgba(255, 255, 255, .94);
+}
+.dashboard-page .filters .filter-btn {
+  box-shadow:
+    7px 7px 15px rgba(194, 86, 32, .31),
+    -6px -6px 14px rgba(255, 255, 255, .88),
+    inset 0 1px rgba(255, 255, 255, .24);
+}
+.dashboard-page .drivers {
+  border-radius: 20px;
+}
+.dashboard-page .drivers th {
+  background: rgba(229, 235, 240, .72);
+}
+.dashboard-page .drivers td {
+  border-color: rgba(176, 188, 199, .22);
+  background: #edf2f6;
+}
+.dashboard-page .drivers tbody tr:nth-child(even) td {
+  background: #e9eef2;
+}
+.dashboard-page .drivers tbody tr:hover td {
+  background: rgba(246, 249, 251, .96);
+}
+.dashboard-page .status,
+.dashboard-page mark {
+  box-shadow:
+    inset 2px 2px 4px rgba(168, 180, 190, .24),
+    inset -2px -2px 4px rgba(255, 255, 255, .76);
+}
+.dashboard-page .activity {
+  background: rgba(229, 235, 240, .72);
+  box-shadow:
+    inset 4px 4px 9px rgba(166, 180, 191, .26),
+    inset -4px -4px 9px rgba(255, 255, 255, .8);
+}
+.dashboard-page .top-drivers .trophy {
+  filter: drop-shadow(2px 3px 4px rgba(213, 158, 0, .25));
+}
+.dashboard-page .top-drivers .leader {
+  margin-bottom: 3px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: rgba(232, 238, 243, .56);
+  box-shadow:
+    inset 4px 4px 8px rgba(157, 172, 184, .23),
+    inset -4px -4px 8px rgba(255, 255, 255, .7);
+}
+.dashboard-page .top-drivers .avatar,
+.dashboard-page .top-drivers .rank {
+  box-shadow:
+    4px 4px 8px rgba(148, 164, 177, .43),
+    -4px -4px 8px rgba(255, 255, 255, .88);
+}
+.dashboard-page .top-drivers .leader > strong {
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: #edf2f6;
+  box-shadow:
+    3px 3px 7px rgba(157, 172, 184, .32),
+    -3px -3px 7px rgba(255, 255, 255, .82);
+}
+.dashboard-page .leader-chart {
+  padding: 9px 9px 2px;
+  border-radius: 14px;
+  background: rgba(232, 238, 243, .66);
+  box-shadow:
+    inset 6px 6px 12px rgba(157, 172, 184, .32),
+    inset -6px -6px 12px rgba(255, 255, 255, .82);
+}
+.dashboard-page .leader-plot {
+  height: 97px;
+}
+.dashboard-page .leader-column > span {
+  border-radius: 4px 4px 1px 1px;
+  box-shadow:
+    5px 4px 9px rgba(114, 135, 151, .28),
+    -3px -3px 7px rgba(255, 255, 255, .42),
+    inset 1px 1px rgba(255, 255, 255, .2);
+}
+.dashboard-page .bar-orange {
+  filter: drop-shadow(0 4px 5px rgba(242, 103, 34, .2));
+}
+.dashboard-page .bar-cyan {
+  filter: drop-shadow(0 4px 5px rgba(36, 148, 177, .2));
+}
+.dashboard-page .bar-navy {
+  filter: drop-shadow(0 4px 5px rgba(28, 63, 100, .2));
+}
+.app-shell:has(.dashboard-page) .sidebar {
+  box-shadow:
+    -12px 0 28px rgba(35, 83, 111, .26),
+    inset 5px 0 14px rgba(255, 255, 255, .08),
+    inset -5px 0 14px rgba(17, 75, 112, .16);
+}
+.app-shell:has(.dashboard-page) .nav-item {
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.app-shell:has(.dashboard-page) .nav-item:hover {
+  transform: translateX(-2px);
+  box-shadow:
+    inset 3px 3px 7px rgba(22, 91, 126, .22),
+    inset -3px -3px 7px rgba(255, 255, 255, .08);
+}
+.app-shell:has(.dashboard-page) .nav-item.active {
+  background: rgba(255, 255, 255, .14);
+  box-shadow:
+    inset 4px 4px 9px rgba(22, 91, 126, .28),
+    inset -4px -4px 9px rgba(255, 255, 255, .09);
+}
+.app-shell:has(.dashboard-page) .logout {
+  box-shadow:
+    inset 4px 4px 9px rgba(20, 91, 124, .26),
+    inset -4px -4px 9px rgba(255, 255, 255, .08);
+}
+
+/* Dashboard + Driver Management — extra-deep refinement */
+main:has(.dashboard-page),
+main:has(.drivers-page) {
+  background:
+    radial-gradient(circle at 82% 15%, rgba(37, 159, 188, .075), transparent 27%),
+    radial-gradient(circle at 12% 88%, rgba(242, 103, 34, .065), transparent 28%),
+    #eaf0f4;
+}
+.dashboard-page .panel,
+.dashboard-page .stats article,
+.drivers-page .panel {
+  outline: 1px solid rgba(255, 255, 255, .72);
+  outline-offset: -1px;
+  box-shadow:
+    19px 19px 38px rgba(145, 160, 172, .6),
+    -17px -17px 34px rgba(255, 255, 255, .98),
+    inset 2px 2px 1px rgba(255, 255, 255, .82),
+    inset -1px -1px 1px rgba(151, 168, 180, .11);
+}
+.dashboard-page .panel:hover,
+.drivers-page .full-drivers-table:hover,
+.drivers-page .driver-toolbar:hover {
+  box-shadow:
+    21px 21px 42px rgba(145, 160, 172, .63),
+    -18px -18px 36px rgba(255, 255, 255, 1),
+    inset 2px 2px 1px rgba(255, 255, 255, .86),
+    inset -1px -1px 1px rgba(151, 168, 180, .12);
+}
+main:has(.dashboard-page) .topbar,
+main:has(.drivers-page) .topbar {
+  box-shadow:
+    0 13px 28px rgba(143, 159, 171, .4),
+    inset 0 2px rgba(255, 255, 255, .78),
+    inset 0 -1px rgba(139, 157, 170, .11);
+}
+.dashboard-page .metric-icon,
+.dashboard-page .activity-icon,
+.drivers-page .driver-metric-icon {
+  outline: 1px solid rgba(255, 255, 255, .7);
+  box-shadow:
+    inset 7px 7px 14px rgba(144, 161, 174, .47),
+    inset -7px -7px 14px rgba(255, 255, 255, .98),
+    6px 6px 13px rgba(137, 154, 167, .24),
+    -5px -5px 11px rgba(255, 255, 255, .76);
+}
+.dashboard-page .filters label,
+.dashboard-page .tabs,
+.drivers-page .driver-toolbar label {
+  box-shadow:
+    inset 8px 8px 15px rgba(143, 160, 173, .47),
+    inset -8px -8px 15px rgba(255, 255, 255, .99),
+    1px 1px 0 rgba(255, 255, 255, .8);
+}
+.dashboard-page .filters input:focus,
+.dashboard-page .filters select:focus,
+.drivers-page .driver-toolbar input:focus,
+.drivers-page .driver-toolbar select:focus {
+  color: #173c63;
+}
+.dashboard-page .filters label:focus-within,
+.drivers-page .driver-toolbar label:focus-within {
+  box-shadow:
+    inset 8px 8px 15px rgba(143, 160, 173, .46),
+    inset -8px -8px 15px rgba(255, 255, 255, .99),
+    0 0 0 3px rgba(28, 149, 181, .13),
+    0 7px 16px rgba(28, 149, 181, .1);
+}
+.dashboard-page .details,
+.dashboard-page .lock,
+.dashboard-page .pagination button,
+.drivers-page .details,
+.drivers-page .lock,
+.drivers-page .driver-pagination button,
+.drivers-page .driver-toolbar .outline {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.dashboard-page .details:hover,
+.dashboard-page .lock:hover,
+.dashboard-page .pagination button:hover,
+.drivers-page .details:hover,
+.drivers-page .lock:hover,
+.drivers-page .driver-pagination button:hover,
+.drivers-page .driver-toolbar .outline:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    8px 8px 16px rgba(143, 159, 172, .52),
+    -8px -8px 16px rgba(255, 255, 255, .98);
+}
+.dashboard-page .filters .filter-btn:hover,
+.drivers-page .driver-toolbar .add-driver:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    10px 10px 21px rgba(190, 82, 29, .39),
+    -8px -8px 18px rgba(255, 255, 255, .94),
+    inset 0 2px rgba(255, 255, 255, .26);
+}
+.dashboard-page .line-chart,
+.dashboard-page .pie-wrap,
+.dashboard-page .leader-chart {
+  outline: 1px solid rgba(255, 255, 255, .64);
+  box-shadow:
+    inset 9px 9px 18px rgba(143, 160, 173, .42),
+    inset -9px -9px 18px rgba(255, 255, 255, .95),
+    5px 5px 12px rgba(143, 160, 173, .14);
+}
+.dashboard-page .drivers tbody tr,
+.drivers-page .full-drivers-table tbody tr {
+  transition: filter .18s ease;
+}
+.dashboard-page .drivers tbody tr:hover,
+.drivers-page .full-drivers-table tbody tr:hover {
+  filter: drop-shadow(0 5px 8px rgba(113, 133, 148, .13));
+}
+.app-shell:has(.dashboard-page) .sidebar,
+.app-shell:has(.drivers-page) .sidebar {
+  box-shadow:
+    -17px 0 36px rgba(28, 72, 101, .34),
+    inset 7px 0 17px rgba(255, 255, 255, .1),
+    inset -7px 0 17px rgba(11, 68, 103, .2);
+}
+.app-shell:has(.drivers-page) .nav-item {
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.app-shell:has(.drivers-page) .nav-item:hover {
+  transform: translateX(-2px);
+  box-shadow:
+    inset 4px 4px 9px rgba(22, 91, 126, .28),
+    inset -4px -4px 9px rgba(255, 255, 255, .09);
+}
+.app-shell:has(.drivers-page) .nav-item.active,
+.app-shell:has(.dashboard-page) .nav-item.active {
+  background: rgba(255, 255, 255, .16);
+  box-shadow:
+    inset 6px 6px 12px rgba(16, 78, 112, .32),
+    inset -6px -6px 12px rgba(255, 255, 255, .11),
+    -5px 5px 12px rgba(21, 78, 108, .15);
+}
+.app-shell:has(.drivers-page) .logout {
+  box-shadow:
+    inset 5px 5px 11px rgba(20, 91, 124, .3),
+    inset -5px -5px 11px rgba(255, 255, 255, .09);
+}
+
+/* Dashboard + Driver Management — deep Neumorphic sidebar internals */
+.app-shell:has(.dashboard-page) .sidebar,
+.app-shell:has(.drivers-page) .sidebar {
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 75% 13%, rgba(255, 255, 255, .13), transparent 22%),
+    radial-gradient(circle at 22% 78%, rgba(20, 193, 205, .2), transparent 32%),
+    linear-gradient(180deg, #426fa5 0%, #2389ad 52%, #169bb3 100%);
+}
+.app-shell:has(.dashboard-page) .sidebar::before,
+.app-shell:has(.drivers-page) .sidebar::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -70px;
+  right: -75px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 103, 34, .2), transparent 68%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+.app-shell:has(.dashboard-page) .sidebar > *,
+.app-shell:has(.drivers-page) .sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+.app-shell:has(.dashboard-page) .logo,
+.app-shell:has(.drivers-page) .logo {
+  border-bottom: 0;
+  box-shadow:
+    inset 0 -7px 14px rgba(18, 81, 119, .18),
+    inset 0 5px 12px rgba(255, 255, 255, .07),
+    0 8px 17px rgba(17, 72, 105, .15);
+}
+.app-shell:has(.dashboard-page) .logo img,
+.app-shell:has(.drivers-page) .logo img {
+  filter:
+    drop-shadow(5px 6px 8px rgba(10, 57, 87, .3))
+    drop-shadow(-3px -3px 5px rgba(255, 255, 255, .1));
+}
+.app-shell:has(.dashboard-page) .side-profile,
+.app-shell:has(.drivers-page) .side-profile {
+  margin: 10px 12px;
+  height: 62px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .055);
+  box-shadow:
+    inset 5px 5px 11px rgba(15, 75, 109, .3),
+    inset -5px -5px 11px rgba(255, 255, 255, .09),
+    5px 6px 13px rgba(14, 69, 102, .13);
+}
+.app-shell:has(.dashboard-page) .side-profile .avatar,
+.app-shell:has(.drivers-page) .side-profile .avatar {
+  box-shadow:
+    5px 5px 10px rgba(10, 61, 92, .38),
+    -4px -4px 9px rgba(255, 255, 255, .12),
+    inset 1px 1px rgba(255, 255, 255, .28);
+}
+.app-shell:has(.dashboard-page) .sidebar nav,
+.app-shell:has(.drivers-page) .sidebar nav {
+  padding: 6px 9px 0;
+}
+.app-shell:has(.dashboard-page) .nav-item,
+.app-shell:has(.drivers-page) .nav-item {
+  margin-bottom: 4px;
+  border-radius: 11px;
+  box-shadow:
+    3px 4px 9px rgba(13, 69, 102, .11),
+    -2px -2px 6px rgba(255, 255, 255, .035);
+}
+.app-shell:has(.dashboard-page) .nav-item svg,
+.app-shell:has(.drivers-page) .nav-item svg {
+  padding: 3px;
+  box-sizing: content-box;
+  border-radius: 7px;
+  filter: drop-shadow(2px 3px 3px rgba(11, 61, 91, .22));
+  box-shadow:
+    inset 2px 2px 5px rgba(12, 67, 99, .2),
+    inset -2px -2px 5px rgba(255, 255, 255, .07);
+}
+.app-shell:has(.dashboard-page) .nav-item.active,
+.app-shell:has(.drivers-page) .nav-item.active {
+  border-right-color: #ff7029;
+  box-shadow:
+    inset 7px 7px 14px rgba(12, 68, 101, .34),
+    inset -7px -7px 14px rgba(255, 255, 255, .12),
+    6px 7px 14px rgba(11, 63, 94, .2);
+}
+.app-shell:has(.dashboard-page) .logout,
+.app-shell:has(.drivers-page) .logout {
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .08);
+  box-shadow:
+    inset 5px 5px 11px rgba(12, 67, 99, .3),
+    inset -5px -5px 11px rgba(255, 255, 255, .1),
+    5px 6px 12px rgba(11, 62, 93, .14);
+}
+
+/* Dashboard + Driver Management — Neumorphic header internals */
+main:has(.dashboard-page) .topbar,
+main:has(.drivers-page) .topbar {
+  background:
+    radial-gradient(circle at 88% 30%, rgba(24, 157, 187, .08), transparent 22%),
+    rgba(237, 242, 246, .91);
+}
+main:has(.dashboard-page) .topbar .title,
+main:has(.drivers-page) .topbar .title {
+  margin: -10px -16px;
+  padding: 10px 16px;
+  border-radius: 13px;
+  background: rgba(237, 242, 246, .58);
+  box-shadow:
+    inset 4px 4px 9px rgba(151, 167, 179, .2),
+    inset -4px -4px 9px rgba(255, 255, 255, .72);
+}
+main:has(.dashboard-page) .topbar .title h1,
+main:has(.drivers-page) .topbar .title h1 {
+  text-shadow:
+    1px 1px 0 rgba(255, 255, 255, .72),
+    2px 3px 5px rgba(116, 136, 151, .13);
+}
+main:has(.dashboard-page) .top-actions,
+main:has(.drivers-page) .top-actions {
+  margin: -7px;
+  padding: 7px;
+  border-radius: 16px;
+  background: rgba(233, 239, 243, .7);
+  box-shadow:
+    inset 5px 5px 11px rgba(148, 165, 178, .28),
+    inset -5px -5px 11px rgba(255, 255, 255, .82);
+}
+main:has(.dashboard-page) .bell,
+main:has(.dashboard-page) .menu-btn,
+main:has(.drivers-page) .bell,
+main:has(.drivers-page) .menu-btn {
+  background: #edf2f6;
+  box-shadow:
+    6px 6px 12px rgba(143, 159, 172, .46),
+    -6px -6px 12px rgba(255, 255, 255, .95),
+    inset 1px 1px rgba(255, 255, 255, .72);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+main:has(.dashboard-page) .bell:hover,
+main:has(.dashboard-page) .menu-btn:hover,
+main:has(.drivers-page) .bell:hover,
+main:has(.drivers-page) .menu-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    8px 8px 16px rgba(143, 159, 172, .5),
+    -8px -8px 16px rgba(255, 255, 255, .98);
+}
+main:has(.dashboard-page) .top-actions > .avatar,
+main:has(.drivers-page) .top-actions > .avatar {
+  border: 2px solid rgba(255, 255, 255, .8);
+  box-shadow:
+    6px 6px 12px rgba(143, 159, 172, .48),
+    -5px -5px 11px rgba(255, 255, 255, .92),
+    inset 1px 1px rgba(255, 255, 255, .28);
+}
+main:has(.dashboard-page) .bell span,
+main:has(.drivers-page) .bell span {
+  border: 2px solid #edf2f6;
+  box-shadow:
+    3px 4px 8px rgba(176, 73, 24, .32),
+    -2px -2px 5px rgba(255, 255, 255, .74);
+}
+
+/* Full admin-panel dark mode */
+[data-theme="dark"] {
+  color: #e5edf5;
+  background: #111820;
+}
+[data-theme="dark"] body,
+[data-theme="dark"] main,
+[data-theme="dark"] main:has(.dashboard-page),
+[data-theme="dark"] main:has(.drivers-page) {
+  color: #e5edf5;
+  background:
+    radial-gradient(circle at 82% 15%, rgba(21, 151, 181, .13), transparent 29%),
+    radial-gradient(circle at 12% 88%, rgba(242, 103, 34, .1), transparent 30%),
+    #121922;
+}
+[data-theme="dark"] .topbar,
+[data-theme="dark"] main:has(.dashboard-page) .topbar,
+[data-theme="dark"] main:has(.drivers-page) .topbar {
+  color: #e8f0f7;
+  background:
+    radial-gradient(circle at 88% 30%, rgba(24, 157, 187, .1), transparent 24%),
+    rgba(24, 32, 42, .94);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, .48),
+    inset 0 1px rgba(255, 255, 255, .055),
+    inset 0 -1px rgba(0, 0, 0, .5);
+}
+[data-theme="dark"] .title h1,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] b,
+[data-theme="dark"] strong {
+  color: #e9f1f8;
+}
+[data-theme="dark"] .title p,
+[data-theme="dark"] p,
+[data-theme="dark"] small {
+  color: #8997a5;
+}
+[data-theme="dark"] .panel,
+[data-theme="dark"] .stats article,
+[data-theme="dark"] .driver-metrics article,
+[data-theme="dark"] .settings-card,
+[data-theme="dark"] .dashboard-page .panel,
+[data-theme="dark"] .dashboard-page .stats article,
+[data-theme="dark"] .drivers-page .panel {
+  border-color: rgba(255, 255, 255, .035);
+  outline-color: rgba(255, 255, 255, .045);
+  color: #dce6ef;
+  background: rgba(26, 35, 45, .95);
+  box-shadow:
+    14px 14px 30px rgba(0, 0, 0, .56),
+    -10px -10px 25px rgba(43, 56, 69, .4),
+    inset 1px 1px rgba(255, 255, 255, .035),
+    inset -1px -1px rgba(0, 0, 0, .34);
+}
+[data-theme="dark"] .metric-icon,
+[data-theme="dark"] .driver-metric-icon,
+[data-theme="dark"] .activity-icon,
+[data-theme="dark"] .setting-title-icon,
+[data-theme="dark"] .security-icon {
+  outline-color: rgba(255, 255, 255, .045);
+  background: #1b2530;
+  box-shadow:
+    inset 6px 6px 12px rgba(0, 0, 0, .48),
+    inset -6px -6px 12px rgba(48, 62, 75, .35),
+    5px 5px 11px rgba(0, 0, 0, .3);
+}
+[data-theme="dark"] .filters label,
+[data-theme="dark"] .driver-toolbar label,
+[data-theme="dark"] .form-grid input,
+[data-theme="dark"] .driver-modal input,
+[data-theme="dark"] .language-picker button,
+[data-theme="dark"] .tabs,
+[data-theme="dark"] .search {
+  border-color: rgba(255, 255, 255, .045);
+  color: #b6c2ce;
+  background: #18212b;
+  box-shadow:
+    inset 6px 6px 12px rgba(0, 0, 0, .48),
+    inset -6px -6px 12px rgba(48, 62, 75, .31);
+}
+[data-theme="dark"] input,
+[data-theme="dark"] select {
+  color: #c8d3dd !important;
+}
+[data-theme="dark"] input::placeholder {
+  color: #71808e !important;
+}
+[data-theme="dark"] select option {
+  color: #dbe5ee;
+  background: #18212b;
+}
+[data-theme="dark"] .line-chart,
+[data-theme="dark"] .pie-wrap,
+[data-theme="dark"] .leader-chart,
+[data-theme="dark"] .finance-line,
+[data-theme="dark"] .finance-donut-wrap {
+  outline-color: rgba(255, 255, 255, .035);
+  background: rgba(20, 29, 38, .78);
+  box-shadow:
+    inset 8px 8px 17px rgba(0, 0, 0, .5),
+    inset -8px -8px 17px rgba(46, 59, 72, .3);
+}
+[data-theme="dark"] .grid-line,
+[data-theme="dark"] .leader-grid {
+  stroke: rgba(151, 168, 182, .14);
+  background: rgba(151, 168, 182, .14);
+}
+[data-theme="dark"] .chart-labels,
+[data-theme="dark"] .line-y-axis,
+[data-theme="dark"] .chart-y-axis,
+[data-theme="dark"] .leader-column small {
+  color: #82909d;
+}
+[data-theme="dark"] table,
+[data-theme="dark"] thead,
+[data-theme="dark"] tbody {
+  color: #cbd6df;
+  background: transparent;
+}
+[data-theme="dark"] th,
+[data-theme="dark"] .drivers th,
+[data-theme="dark"] .full-drivers-table th {
+  color: #8e9ba8;
+  background: #171f28 !important;
+}
+[data-theme="dark"] td,
+[data-theme="dark"] .drivers td,
+[data-theme="dark"] .full-drivers-table td,
+[data-theme="dark"] .drivers tbody tr:nth-child(even) td,
+[data-theme="dark"] .full-drivers-table tbody tr:nth-child(even) td {
+  border-color: rgba(255, 255, 255, .04);
+  color: #9caab7;
+  background: #1a232d !important;
+}
+[data-theme="dark"] tbody tr:hover td,
+[data-theme="dark"] .drivers tbody tr:hover td,
+[data-theme="dark"] .full-drivers-table tbody tr:hover td {
+  background: #202b36 !important;
+}
+[data-theme="dark"] mark {
+  color: #d9e7f2;
+  background: #222e39;
+}
+[data-theme="dark"] .activity,
+[data-theme="dark"] .transaction-head,
+[data-theme="dark"] .timeline-item,
+[data-theme="dark"] .top-drivers .leader {
+  color: #d6e0e9;
+  background: rgba(21, 30, 39, .76);
+  box-shadow:
+    inset 4px 4px 9px rgba(0, 0, 0, .42),
+    inset -4px -4px 9px rgba(48, 61, 74, .25);
+}
+[data-theme="dark"] .legend span,
+[data-theme="dark"] .leader > strong,
+[data-theme="dark"] .pagination button,
+[data-theme="dark"] .driver-pagination button:not(.current),
+[data-theme="dark"] .outline {
+  border-color: rgba(255, 255, 255, .05);
+  color: #bfccd7;
+  background: #1a232d !important;
+  box-shadow:
+    5px 5px 11px rgba(0, 0, 0, .45),
+    -4px -4px 9px rgba(46, 59, 72, .3);
+}
+[data-theme="dark"] .settings-card-head,
+[data-theme="dark"] .setting-row,
+[data-theme="dark"] .security-row,
+[data-theme="dark"] .pagination,
+[data-theme="dark"] .driver-table-footer,
+[data-theme="dark"] .drivers-head,
+[data-theme="dark"] .full-drivers-head,
+[data-theme="dark"] .commission-head {
+  border-color: rgba(255, 255, 255, .045);
+}
+[data-theme="dark"] .language-picker button.selected {
+  border-color: #168faf;
+  color: #e2edf4;
+  background: #1a303a;
+  box-shadow: 0 0 0 3px rgba(22, 143, 175, .12);
+}
+[data-theme="dark"] .toggle {
+  background: #303b45;
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, .38);
+}
+[data-theme="dark"] .toggle--on {
+  background: #11a55a;
+}
+[data-theme="dark"] .toggle span {
+  background: #dce6ee;
+}
+[data-theme="dark"] .driver-modal {
+  color: #dce7ef;
+  background: #1a232d;
+  box-shadow:
+    18px 18px 38px rgba(0, 0, 0, .65),
+    -9px -9px 24px rgba(48, 61, 74, .3);
+}
+[data-theme="dark"] .driver-modal-head button,
+[data-theme="dark"] .icon-button,
+[data-theme="dark"] .bell,
+[data-theme="dark"] .menu-btn {
+  color: #b8c7d3;
+  background: #1b2530 !important;
+}
+[data-theme="dark"] .pie,
+[data-theme="dark"] .finance-donut {
+  border-color: #1a232d;
+  box-shadow:
+    8px 8px 17px rgba(0, 0, 0, .55),
+    -7px -7px 15px rgba(48, 61, 74, .28);
+}
+[data-theme="dark"] .finance-donut:after {
+  background: #1a232d;
+}
+[data-theme="dark"] .sidebar {
+  background:
+    radial-gradient(circle at 75% 13%, rgba(255, 255, 255, .08), transparent 22%),
+    linear-gradient(180deg, #243d5b 0%, #18566f 52%, #12677a 100%) !important;
+  box-shadow:
+    -17px 0 36px rgba(0, 0, 0, .5),
+    inset 7px 0 17px rgba(255, 255, 255, .045),
+    inset -7px 0 17px rgba(0, 0, 0, .24) !important;
+}
+
+/* Dark Dashboard — match Driver Management's bright white Neumorphic edge */
+[data-theme="dark"] .dashboard-page .panel,
+[data-theme="dark"] .dashboard-page .stats article {
+  outline: 1px solid rgba(255, 255, 255, .1);
+  outline-offset: -1px;
+  background: #1a2430;
+  box-shadow:
+    14px 14px 30px rgba(0, 0, 0, .58),
+    -10px -10px 24px rgba(255, 255, 255, .1),
+    inset 2px 2px 1px rgba(255, 255, 255, .06),
+    inset -2px -2px 2px rgba(0, 0, 0, .38);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+[data-theme="dark"] .dashboard-page .stats article:hover,
+[data-theme="dark"] .dashboard-page .panel:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    20px 20px 39px rgba(0, 0, 0, .67),
+    -19px -19px 35px rgba(255, 255, 255, .7),
+    inset 2px 2px 1px rgba(255, 255, 255, .11),
+    inset -2px -2px 2px rgba(0, 0, 0, .4);
+}
+[data-theme="dark"] .dashboard-page .drivers tbody td {
+  transition: background .2s ease, box-shadow .2s ease, color .2s ease;
+}
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover {
+  filter: none;
+}
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover td {
+  color: #dce8f1;
+  background: #202c37 !important;
+  box-shadow:
+    inset 7px 0 11px rgba(255, 255, 255, .34),
+    inset -7px 0 11px rgba(255, 255, 255, .34),
+    inset 0 5px 9px rgba(255, 255, 255, .22),
+    inset 0 -5px 9px rgba(255, 255, 255, .13),
+    0 0 13px rgba(235, 247, 255, .18);
+}
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover .details,
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover .lock {
+  box-shadow:
+    0 0 13px rgba(255, 255, 255, .52),
+    5px 5px 10px rgba(0, 0, 0, .42),
+    -3px -3px 8px rgba(255, 255, 255, .2);
+}
+
+/* Dark mode: bright glow is hover-only, never permanently on */
+[data-theme="dark"] main:has(.dashboard-page) .topbar .title,
+[data-theme="dark"] main:has(.drivers-page) .topbar .title {
+  background: rgba(24, 33, 43, .48);
+  box-shadow:
+    inset 3px 3px 7px rgba(0, 0, 0, .28),
+    inset -3px -3px 7px rgba(255, 255, 255, .035);
+}
+[data-theme="dark"] main:has(.dashboard-page) .topbar .title h1,
+[data-theme="dark"] main:has(.drivers-page) .topbar .title h1 {
+  text-shadow: none;
+}
+[data-theme="dark"] main:has(.dashboard-page) .top-actions,
+[data-theme="dark"] main:has(.drivers-page) .top-actions {
+  background: rgba(20, 29, 38, .55);
+  box-shadow:
+    inset 4px 4px 9px rgba(0, 0, 0, .34),
+    inset -4px -4px 9px rgba(255, 255, 255, .035);
+}
+[data-theme="dark"] main:has(.dashboard-page) .bell,
+[data-theme="dark"] main:has(.dashboard-page) .menu-btn,
+[data-theme="dark"] main:has(.drivers-page) .bell,
+[data-theme="dark"] main:has(.drivers-page) .menu-btn,
+[data-theme="dark"] main:has(.dashboard-page) .top-actions > .avatar,
+[data-theme="dark"] main:has(.drivers-page) .top-actions > .avatar {
+  box-shadow:
+    5px 5px 11px rgba(0, 0, 0, .46),
+    -4px -4px 9px rgba(255, 255, 255, .065),
+    inset 1px 1px rgba(255, 255, 255, .045);
+}
+[data-theme="dark"] .dashboard-page .filters .outline,
+[data-theme="dark"] .dashboard-page .filters .filter-btn,
+[data-theme="dark"] .dashboard-page .details,
+[data-theme="dark"] .dashboard-page .lock,
+[data-theme="dark"] .dashboard-page .pagination button,
+[data-theme="dark"] .drivers-page .driver-toolbar .outline,
+[data-theme="dark"] .drivers-page .driver-toolbar .add-driver,
+[data-theme="dark"] .drivers-page .details,
+[data-theme="dark"] .drivers-page .lock,
+[data-theme="dark"] .drivers-page .driver-pagination button {
+  box-shadow:
+    5px 5px 11px rgba(0, 0, 0, .5),
+    -4px -4px 9px rgba(255, 255, 255, .07),
+    inset 1px 1px rgba(255, 255, 255, .045);
+}
+[data-theme="dark"] .app-shell:has(.dashboard-page) .nav-item,
+[data-theme="dark"] .app-shell:has(.drivers-page) .nav-item {
+  box-shadow:
+    3px 4px 8px rgba(0, 0, 0, .16),
+    -2px -2px 6px rgba(255, 255, 255, .025);
+}
+[data-theme="dark"] .app-shell:has(.dashboard-page) .nav-item.active,
+[data-theme="dark"] .app-shell:has(.drivers-page) .nav-item.active {
+  box-shadow:
+    inset 5px 5px 11px rgba(0, 0, 0, .27),
+    inset -5px -5px 11px rgba(255, 255, 255, .055);
+}
+[data-theme="dark"] main:has(.dashboard-page) .bell:hover,
+[data-theme="dark"] main:has(.dashboard-page) .menu-btn:hover,
+[data-theme="dark"] main:has(.drivers-page) .bell:hover,
+[data-theme="dark"] main:has(.drivers-page) .menu-btn:hover,
+[data-theme="dark"] .dashboard-page .filters .outline:hover,
+[data-theme="dark"] .dashboard-page .filters .filter-btn:hover,
+[data-theme="dark"] .dashboard-page .details:hover,
+[data-theme="dark"] .dashboard-page .lock:hover,
+[data-theme="dark"] .dashboard-page .pagination button:hover,
+[data-theme="dark"] .drivers-page .driver-toolbar .outline:hover,
+[data-theme="dark"] .drivers-page .driver-toolbar .add-driver:hover,
+[data-theme="dark"] .drivers-page .details:hover,
+[data-theme="dark"] .drivers-page .lock:hover,
+[data-theme="dark"] .drivers-page .driver-pagination button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 16px rgba(255, 255, 255, .46),
+    7px 7px 14px rgba(0, 0, 0, .52),
+    -5px -5px 11px rgba(255, 255, 255, .14);
+}
+[data-theme="dark"] .app-shell:has(.dashboard-page) .nav-item:hover,
+[data-theme="dark"] .app-shell:has(.drivers-page) .nav-item:hover {
+  box-shadow:
+    inset 4px 4px 9px rgba(0, 0, 0, .3),
+    inset -4px -4px 9px rgba(255, 255, 255, .08),
+    0 0 13px rgba(255, 255, 255, .17);
+}
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover .details,
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover .lock,
+[data-theme="dark"] .drivers-page .full-drivers-table tbody tr:hover .details,
+[data-theme="dark"] .drivers-page .full-drivers-table tbody tr:hover .lock {
+  box-shadow:
+    0 0 14px rgba(255, 255, 255, .5),
+    6px 6px 12px rgba(0, 0, 0, .48),
+    -4px -4px 9px rgba(255, 255, 255, .16);
+}
+[data-theme="dark"] .drivers-page .driver-toolbar {
+  transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+}
+[data-theme="dark"] .drivers-page .driver-toolbar:hover {
+  transform: translateY(-3px);
+  background: #1b2631;
+  box-shadow:
+    20px 20px 39px rgba(0, 0, 0, .67),
+    -19px -19px 35px rgba(255, 255, 255, .7),
+    inset 2px 2px 1px rgba(255, 255, 255, .11),
+    inset -2px -2px 2px rgba(0, 0, 0, .4);
+}
+
+/* Dark mode: force the driver table and complete right sidebar into dark palette */
+[data-theme="dark"] .drivers-page .full-drivers-table {
+  color: #dce6ef;
+  background: #18222c;
+  box-shadow:
+    16px 16px 34px rgba(0, 0, 0, .62),
+    -10px -10px 25px rgba(255, 255, 255, .08),
+    inset 1px 1px rgba(255, 255, 255, .045);
+  transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+}
+[data-theme="dark"] .drivers-page .full-drivers-table:hover {
+  transform: translateY(-3px);
+  background: #1b2631;
+  box-shadow:
+    20px 20px 39px rgba(0, 0, 0, .68),
+    -19px -19px 35px rgba(255, 255, 255, .68),
+    inset 2px 2px 1px rgba(255, 255, 255, .11),
+    inset -2px -2px 2px rgba(0, 0, 0, .42);
+}
+[data-theme="dark"] .drivers-page .full-drivers-head,
+[data-theme="dark"] .drivers-page .driver-table-footer {
+  background: #19232d;
+}
+[data-theme="dark"] .app-shell .sidebar {
+  color: #dce8f1;
+  background:
+    radial-gradient(circle at 76% 12%, rgba(33, 151, 177, .1), transparent 25%),
+    radial-gradient(circle at 20% 78%, rgba(242, 103, 34, .045), transparent 28%),
+    linear-gradient(180deg, #17222e 0%, #121c25 56%, #0f171f 100%) !important;
+  box-shadow:
+    -17px 0 38px rgba(0, 0, 0, .72),
+    inset 7px 0 17px rgba(255, 255, 255, .025),
+    inset -7px 0 17px rgba(0, 0, 0, .4) !important;
+  scrollbar-color: #354553 #111820;
+}
+[data-theme="dark"] .app-shell .sidebar .logo {
+  background: rgba(18, 28, 37, .5);
+  box-shadow:
+    inset 0 -8px 16px rgba(0, 0, 0, .34),
+    inset 0 4px 10px rgba(255, 255, 255, .025);
+}
+[data-theme="dark"] .app-shell .sidebar .side-profile {
+  background: #18242e;
+  box-shadow:
+    inset 5px 5px 11px rgba(0, 0, 0, .48),
+    inset -5px -5px 11px rgba(48, 62, 73, .24),
+    6px 7px 15px rgba(0, 0, 0, .32);
+}
+[data-theme="dark"] .app-shell .sidebar .nav-item {
+  color: #bdcbd6;
+  background: #17232d;
+  box-shadow:
+    5px 6px 12px rgba(0, 0, 0, .36),
+    -3px -3px 8px rgba(48, 62, 73, .14);
+}
+[data-theme="dark"] .app-shell .sidebar .nav-item:hover {
+  color: #fff;
+  background: #1c2a35;
+  box-shadow:
+    inset 4px 4px 9px rgba(0, 0, 0, .38),
+    inset -4px -4px 9px rgba(55, 70, 82, .2),
+    0 0 13px rgba(255, 255, 255, .11);
+}
+[data-theme="dark"] .app-shell .sidebar .nav-item.active {
+  color: #fff;
+  background: #202e39;
+  box-shadow:
+    inset 6px 6px 12px rgba(0, 0, 0, .44),
+    inset -6px -6px 12px rgba(58, 73, 85, .22);
+}
+[data-theme="dark"] .app-shell .sidebar .logout {
+  color: #8e9ca8;
+  background: #17232d;
+  box-shadow:
+    inset 5px 5px 11px rgba(0, 0, 0, .42),
+    inset -5px -5px 11px rgba(52, 66, 78, .18);
+}
+[data-theme="dark"] .app-shell .sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+[data-theme="dark"] .app-shell .sidebar::-webkit-scrollbar-track {
+  background: #111820;
+}
+[data-theme="dark"] .app-shell .sidebar::-webkit-scrollbar-thumb {
+  border: 2px solid #111820;
+  border-radius: 10px;
+  background: #354553;
+}
+
+/* Dark Neumorphism — softened white glow */
+[data-theme="dark"] .dashboard-page .stats article:hover,
+[data-theme="dark"] .dashboard-page .panel:hover,
+[data-theme="dark"] .drivers-page .driver-metrics article:hover,
+[data-theme="dark"] .drivers-page .driver-toolbar:hover,
+[data-theme="dark"] .drivers-page .full-drivers-table:hover {
+  box-shadow:
+    18px 18px 36px rgba(0, 0, 0, .62),
+    -14px -14px 29px rgba(255, 255, 255, .24),
+    inset 2px 2px 1px rgba(255, 255, 255, .075),
+    inset -2px -2px 2px rgba(0, 0, 0, .4);
+}
+[data-theme="dark"] main:has(.dashboard-page) .bell:hover,
+[data-theme="dark"] main:has(.dashboard-page) .menu-btn:hover,
+[data-theme="dark"] main:has(.drivers-page) .bell:hover,
+[data-theme="dark"] main:has(.drivers-page) .menu-btn:hover,
+[data-theme="dark"] .dashboard-page .filters .outline:hover,
+[data-theme="dark"] .dashboard-page .filters .filter-btn:hover,
+[data-theme="dark"] .dashboard-page .details:hover,
+[data-theme="dark"] .dashboard-page .lock:hover,
+[data-theme="dark"] .dashboard-page .pagination button:hover,
+[data-theme="dark"] .drivers-page .driver-toolbar .outline:hover,
+[data-theme="dark"] .drivers-page .driver-toolbar .add-driver:hover,
+[data-theme="dark"] .drivers-page .details:hover,
+[data-theme="dark"] .drivers-page .lock:hover,
+[data-theme="dark"] .drivers-page .driver-pagination button:hover {
+  box-shadow:
+    0 0 13px rgba(255, 255, 255, .24),
+    7px 7px 14px rgba(0, 0, 0, .5),
+    -5px -5px 11px rgba(255, 255, 255, .08);
+}
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover td {
+  box-shadow:
+    inset 6px 0 10px rgba(255, 255, 255, .17),
+    inset -6px 0 10px rgba(255, 255, 255, .17),
+    inset 0 4px 8px rgba(255, 255, 255, .11),
+    inset 0 -4px 8px rgba(255, 255, 255, .07),
+    0 0 10px rgba(235, 247, 255, .09);
+}
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover .details,
+[data-theme="dark"] .dashboard-page .drivers tbody tr:hover .lock,
+[data-theme="dark"] .drivers-page .full-drivers-table tbody tr:hover .details,
+[data-theme="dark"] .drivers-page .full-drivers-table tbody tr:hover .lock {
+  box-shadow:
+    0 0 11px rgba(255, 255, 255, .25),
+    6px 6px 12px rgba(0, 0, 0, .46),
+    -4px -4px 9px rgba(255, 255, 255, .08);
+}
+
 /* ─── Customer Support ─── */
 main.main--support { display: flex; flex-direction: column; min-height: 100vh; height: 100vh; overflow: hidden; position: relative; }
 main.main--support .topbar { display: none; }

@@ -78,7 +78,7 @@ export default function Dashboard() {
     link.click()
     URL.revokeObjectURL(url)
   }
-  return <div className="content">
+  return <div className="content dashboard-page">
     <section className="stats">{t.metrics.map((metric, i) => <article key={metric[1]}>
       <MetricIcon index={i} />
       {i === 1

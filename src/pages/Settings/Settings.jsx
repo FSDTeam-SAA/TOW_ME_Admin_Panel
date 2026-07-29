@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Bell, Check, ChevronRight, Globe2, LockKeyhole, Save, ShieldCheck, UserRound } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
+import { useTheme } from '../../theme/ThemeContext'
 
 function Toggle({ checked, onChange }) {
   return <button className={`toggle ${checked ? 'toggle--on' : ''}`} onClick={() => onChange(!checked)} aria-pressed={checked}><span /></button>
@@ -9,6 +10,7 @@ function Toggle({ checked, onChange }) {
 
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage()
+  const { theme, toggleTheme } = useTheme()
   const [alerts, setAlerts] = useState([true, true, false])
   const [saved, setSaved] = useState(false)
 
@@ -37,6 +39,7 @@ export default function Settings() {
           <button className={language === 'he' ? 'selected' : ''} onClick={() => setLanguage('he')}><span>עב</span>{t.hebrew}{language === 'he' && <Check />}</button>
           <button className={language === 'en' ? 'selected' : ''} onClick={() => setLanguage('en')}><span>EN</span>{t.english}{language === 'en' && <Check />}</button>
         </div></div>
+        <div className="setting-row"><div><b>{t.darkMode}</b><span>{t.darkModeHelp}</span></div><Toggle checked={theme === 'dark'} onChange={toggleTheme} /></div>
       </section>
 
       <section className="panel settings-card">
