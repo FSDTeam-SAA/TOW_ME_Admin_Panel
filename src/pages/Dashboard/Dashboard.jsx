@@ -1,7 +1,7 @@
 import React from 'react'
 import {
-  AlertTriangle, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
-  Download, Filter, Search, Star, Trophy, Truck,
+  AlertTriangle, CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
+  Download, Filter, Search, Trophy, Truck,
 } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
@@ -11,6 +11,17 @@ const baseDrivers = [
   { id: 2, he: 'מוחמד ג׳בר', en: 'Mohammed Jaber', initials: 'MJ', color: '#29231f', phone: '052-987-6543', plate: '98–765–43', tows: 98, heRevenue: '₪24,100', enRevenue: '$24,100', live: false },
   { id: 3, he: 'דוד ישראלי', en: 'David Israeli', initials: 'DI', color: '#6a6c4f', phone: '054-321-7890', plate: '55–444–11', tows: 217, heRevenue: '₪62,800', enRevenue: '$62,800', live: true },
 ]
+
+const dashboardIcons = ['truck.png', 'isrial_currency.png', 'tikmark.png', 'star.png']
+
+function MetricIcon({ index }) {
+  return <div className={`metric-icon ${['peach', 'silver', 'mint', 'ice'][index]}`}>
+    <img
+      src={`/assets/dashboard_icon/${dashboardIcons[index]}?v=2`}
+      alt=""
+    />
+  </div>
+}
 
 function LineChart({ labels }) {
   return <div className="line-chart"><svg viewBox="0 0 720 190" preserveAspectRatio="none">
@@ -31,7 +42,7 @@ export default function Dashboard() {
   const drivers = baseDrivers.map(d => ({ ...d, name: d[language], revenue: d[`${language}Revenue`] }))
   return <div className="content">
     <section className="stats">{t.metrics.map((metric, i) => <article key={metric[1]}>
-      <div className={`metric-icon ${['peach', 'silver', 'mint', 'ice'][i]}`}>{i === 0 ? <Truck /> : i === 1 ? '$' : i === 2 ? <Check /> : <Star />}</div>
+      <MetricIcon index={i} />
       <strong>{metric[0]}</strong><p>{metric[1]}</p>{i === 3 ? <div className="stars">{metric[2]}</div> : <small className={i < 2 ? 'up' : ''}>{metric[2]}</small>}
     </article>)}</section>
 

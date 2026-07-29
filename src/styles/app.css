@@ -7,7 +7,7 @@ button, input { font: inherit; }
 button { cursor: pointer; }
 .app-shell { min-height: 100vh; display: grid; grid-template-columns: 1fr 240px; direction: ltr; }
 main { min-width: 0; grid-column: 1; grid-row: 1; direction: rtl; }
-.sidebar { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; color: #fff; background: linear-gradient(180deg, #3d679d, #149ab7); display: flex; flex-direction: column; z-index: 30; }
+.sidebar { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; direction: rtl; color: #fff; background: linear-gradient(180deg, #3d679d, #149ab7); display: flex; flex-direction: column; z-index: 30; }
 .logo { height: 164px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,.12); }
 .logo-pin { width: 23px; height: 23px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 5px; color: white; background: #f26722; font-weight: 800; }
 .logo b { font-size: 16px; letter-spacing: 4px; direction: ltr; }
@@ -41,6 +41,7 @@ nav { padding-top: 11px; }
 .stats small em { color: #bec1c5; font-style: normal; font-weight: 400; }
 .metric-icon { position: absolute; left: 23px; top: 20px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; font-size: 22px; font-weight: 700; }
 .metric-icon svg { width: 21px; }
+.metric-icon img { width: 24px; height: 24px; display: block; object-fit: contain; }
 .peach { color: #1589b0; background: #fff0e9; }
 .silver { color: #29496e; background: #edf0f4; }
 .mint { color: #12bd63; background: #e6f9ef; }
@@ -177,15 +178,6 @@ mark { padding: 3px 8px; border-radius: 8px; color: #173c63; background: #f5f8fa
 .security-row .enabled { margin-inline-start: auto; padding: 4px 9px; border-radius: 10px; color: #0b9e50; background: #e7f8ee; font-size: 10px; font-weight: 700; }
 .save-toast { position: fixed; top: 116px; inset-inline-start: 50%; z-index: 50; transform: translateX(-50%); padding: 11px 17px; display: flex; align-items: center; gap: 8px; border-radius: 11px; color: white; background: #109f54; box-shadow: 0 8px 25px rgba(16,159,84,.25); font-size: 12px; font-weight: 700; }
 
-[dir="rtl"] .sidebar { direction: rtl; }
-[dir="ltr"] .sidebar, [dir="ltr"] main { direction: ltr; }
-[dir="ltr"] .nav-item.active { border-right: 0; border-left: 3px solid #f26722; }
-[dir="ltr"] th, [dir="ltr"] td { text-align: left; }
-[dir="ltr"] .stats strong { text-align: left; }
-[dir="ltr"] .metric-icon { left: auto; right: 23px; }
-[dir="ltr"] .stars { text-align: left; }
-[dir="ltr"] .chart-labels { direction: ltr; }
-[dir="ltr"] .activity strong, [dir="ltr"] .leader > strong { margin-left: auto; margin-right: 0; }
 
 @media (max-width: 760px) {
   .settings-grid { grid-template-columns: 1fr; }
