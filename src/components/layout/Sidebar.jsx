@@ -12,6 +12,9 @@ export default function Sidebar({ page, setPage, open, setOpen }) {
   const { t } = useLanguage()
   const openPage = (index) => {
     if (index === 0) setPage('dashboard')
+    if (index === 1) setPage('drivers')
+    if (index === 2) setPage('finance')
+    if (index === 3) setPage('history')
     if (index === 5) setPage('settings')
     setOpen(false)
   }
@@ -22,7 +25,7 @@ export default function Sidebar({ page, setPage, open, setOpen }) {
     <div className="side-profile"><Avatar text="AC" color="#f16522" large /><div><b>{t.adminName}</b><span>{t.adminRole}</span></div></div>
     <nav>{t.nav.map((label, index) => {
       const Icon = icons[index]
-      const active = (index === 0 && page === 'dashboard') || (index === 5 && page === 'settings')
+      const active = (index === 0 && page === 'dashboard') || (index === 1 && page === 'drivers') || (index === 2 && page === 'finance') || (index === 3 && page === 'history') || (index === 5 && page === 'settings')
       return <button key={label} className={active ? 'nav-item active' : 'nav-item'} onClick={() => openPage(index)}><Icon size={18} /><span>{label}</span></button>
     })}</nav>
     <button className="logout"><LogOut size={17} />{t.logout}</button>
