@@ -185,6 +185,7 @@ export const translations = {
     cmShowing: 'מציג 1–8 מתוך 1,284 לקוחות',
     cmCitySeg: 'פילוח לפי עיר',
     cmTopCustomers: 'לקוחות מובילים',
+    cmOrders: 'הזמנות',
   },
   en: {
     languageName: 'English',
@@ -372,5 +373,6 @@ export const translations = {
     cmShowing: 'Showing 1–8 of 1,284 customers',
     cmCitySeg: 'Segmentation by City',
     cmTopCustomers: 'Top Customers',
+    cmOrders: 'orders',
   },
 }

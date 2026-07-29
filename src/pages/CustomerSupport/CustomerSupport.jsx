@@ -293,6 +293,7 @@ export default function CustomerSupport() {
       <section className="cs-chat-panel">
         <div className="cs-chat-head">
           <div className="cs-chat-user">
+            <Avatar text={selected.initial} color={selected.color} />
             <div>
               <b>{selected.name[lang]}</b>
               <span><i className="cs-dot" />{selected.waiting[lang]}</span>
@@ -348,11 +349,8 @@ export default function CustomerSupport() {
             ))}
           </div>
           <div className="cs-input-row">
-            <button type="button" className="cs-tool" aria-label="forward">
-              <ArrowUpRight size={15} />
-            </button>
-            <button type="button" className="cs-tool" aria-label="star">
-              <Star size={15} color="#ffc400" fill="#ffc400" />
+            <button type="button" className="cs-send" onClick={sendMessage} aria-label="send">
+              <Send size={15} />
             </button>
             <input
               value={draft}
@@ -360,8 +358,11 @@ export default function CustomerSupport() {
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               placeholder={t.writeMessage}
             />
-            <button type="button" className="cs-send" onClick={sendMessage} aria-label="send">
-              <Send size={15} />
+            <button type="button" className="cs-tool" aria-label="star">
+              <Star size={15} color="#ffc400" fill="#ffc400" />
+            </button>
+            <button type="button" className="cs-tool" aria-label="forward">
+              <ArrowUpRight size={15} />
             </button>
           </div>
         </div>
@@ -425,10 +426,8 @@ export default function CustomerSupport() {
           <ul className="cs-history">
             {selected.history.map((h) => (
               <li key={`${h.date}-${h.title.he}`}>
-                <div>
-                  <b>{h.title[lang]}</b>
-                  <span>{h.date}</span>
-                </div>
+                <span>{h.date}</span>
+                <b>{h.title[lang]}</b>
                 {h.ok
                   ? <img src="/icons/success.png" alt="" />
                   : <img src="/icons/warning.png" alt="" />}
@@ -441,20 +440,20 @@ export default function CustomerSupport() {
           <h4>{t.quickActions}</h4>
           <div className="cs-actions">
             <button type="button" className="cs-action cs-action--sms">
+              <span>{t.sendSms}</span>
               <img src="/icons/bell.png" alt="" />
-              {t.sendSms}
             </button>
             <button type="button" className="cs-action cs-action--cancel">
+              <span>{t.cancelOrder}</span>
               <AlertTriangle size={14} />
-              {t.cancelOrder}
             </button>
             <button type="button" className="cs-action cs-action--transfer">
+              <span>{t.transferDriver}</span>
               <img src="/icons/truck.png" alt="" />
-              {t.transferDriver}
             </button>
             <button type="button" className="cs-action cs-action--urgent">
+              <span>{t.markUrgent}</span>
               <Star size={14} fill="#ffc400" color="#f26722" />
-              {t.markUrgent}
             </button>
           </div>
         </div>

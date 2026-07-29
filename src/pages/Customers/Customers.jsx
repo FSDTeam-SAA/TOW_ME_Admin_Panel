@@ -1,10 +1,22 @@
 import React, { useMemo, useState } from 'react'
 import {
-  CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
-  Download, Search, Star, Truck, Users,
+  CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
+  Download, Search, Trophy,
 } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
+
+const dashboardIcons = ['truck.png', 'isrial_currency.png', 'tikmark.png', 'star.png']
+const metricTones = ['peach', 'silver', 'mint', 'ice']
+
+function MetricIcon({ index }) {
+  return <div className={`metric-icon ${metricTones[index]}`}>
+    <img
+      src={`/assets/dashboard_icon/${dashboardIcons[index]}?v=2`}
+      alt=""
+    />
+  </div>
+}
 
 const CUSTOMERS = [
   { id: 1, he: 'דן כהן', en: 'Dan Cohen', initial: 'ד', color: '#f26722', phone: '050-1234567', email: 'dan@email.com', cityHe: 'תל אביב', cityEn: 'Tel Aviv', joined: '12/03/2023', orders: 18, paidHe: '₪7,420', paidEn: '$7,420', last: '28/03/2024', status: 'active' },
@@ -18,18 +30,24 @@ const CUSTOMERS = [
 ]
 
 const TOP = [
-  { he: 'שרה לוי', en: 'Sara Levi', initial: 'ש', color: '#f26722', orders: 31, width: '100%' },
-  { he: 'אבי כהן', en: 'Avi Cohen', initial: 'א', color: '#173c63', orders: 23, width: '74%' },
-  { he: 'דן כהן', en: 'Dan Cohen', initial: 'ד', color: '#1d96b5', orders: 18, width: '58%' },
-  { he: 'רועי מזרחי', en: 'Roi Mizrahi', initial: 'ר', color: '#b9b9b9', orders: 15, width: '48%' },
-  { he: 'מיכל דוד', en: 'Michal David', initial: 'מ', color: '#0cb653', orders: 12, width: '39%' },
+  { he: 'תמר פרץ', en: 'Tamar Peretz', initial: 'ת', color: '#f26722', orders: 31, width: '100%' },
+  { he: 'מאיה לוי', en: 'Maya Levy', initial: 'מ', color: '#1d96b5', orders: 23, width: '74%' },
+  { he: 'רחל גולד', en: 'Rachel Gold', initial: 'ר', color: '#173c63', orders: 17, width: '55%' },
+  { he: 'דן כהן', en: 'Dan Cohen', initial: 'ד', color: '#8a95b2', orders: 12, width: '39%' },
+  { he: 'נועה מזרחי', en: 'Noa Mizrahi', initial: 'נ', color: '#c4c4c4', orders: 8, width: '26%' },
 ]
 
 const CITIES = [
-  { he: 'תל אביב', en: 'Tel Aviv', pct: 35, count: 449, color: '#f26722' },
-  { he: 'ירושלים', en: 'Jerusalem', pct: 25, count: 321, color: '#b9b9b9' },
-  { he: 'חיפה', en: 'Haifa', pct: 22, count: 282, color: '#173c63' },
-  { he: 'אחר', en: 'Other', pct: 18, count: 232, color: '#1d96b5' },
+  { he: 'ירושלים', en: 'Jerusalem', pct: 22, color: '#173c63' },
+  { he: 'אחר', en: 'Other', pct: 25, color: '#b9b9b9' },
+  { he: 'תל אביב', en: 'Tel Aviv', pct: 35, color: '#f26722' },
+  { he: 'חיפה', en: 'Haifa', pct: 18, color: '#1d96b5' },
+]
+
+const CITY_COUNTS = [
+  { he: 'תל אביב', en: 'Tel Aviv', count: 449, color: '#f26722' },
+  { he: 'ירושלים', en: 'Jerusalem', count: 282, color: '#173c63' },
+  { he: 'חיפה', en: 'Haifa', count: 231, color: '#1d96b5' },
 ]
 
 function StatusPill({ status, t }) {
@@ -58,18 +76,18 @@ export default function Customers() {
   }), [query, city, statusFilter, lang])
 
   const metrics = [
-    { value: '1,284', label: t.cmTotal, foot: t.cmTotalTrend, icon: <Users size={20} />, tone: 'peach', up: true },
-    { value: '892', label: t.cmActiveCount, foot: t.cmActiveFoot, icon: <Check size={20} />, tone: 'mint', up: false },
-    { value: '67', label: t.cmNewMonth, foot: t.cmNewTrend, icon: <Star size={20} />, tone: 'ice', up: true },
-    { value: '3.2', label: t.cmAvgOrders, foot: '★★★★☆', icon: <Truck size={20} />, tone: 'silver', stars: true },
+    { value: '1,284', label: t.cmTotal, foot: t.cmTotalTrend, up: true },
+    { value: '892', label: t.cmActiveCount, foot: t.cmActiveFoot, up: false },
+    { value: '67', label: t.cmNewMonth, foot: t.cmNewTrend, up: true },
+    { value: '3.2', label: t.cmAvgOrders, foot: '★★★★☆', stars: true },
   ]
 
   return (
     <div className="content cm-page">
       <section className="stats">
-        {metrics.map((m) => (
+        {metrics.map((m, i) => (
           <article key={m.label}>
-            <div className={`metric-icon ${m.tone}`}>{m.icon}</div>
+            <MetricIcon index={i} />
             <strong>{m.value}</strong>
             <p>{m.label}</p>
             {m.stars
@@ -190,11 +208,14 @@ export default function Customers() {
 
       <section className="lower-grid cm-lower">
         <article className="panel cm-top-panel">
-          <div className="panel-head"><h2>{t.cmTopCustomers}</h2></div>
+          <div className="panel-head">
+            <h2>{t.cmTopCustomers}</h2>
+            <Trophy className="trophy" />
+          </div>
           <div className="cm-top-list">
             {TOP.map((c, i) => (
               <div key={c.en} className="cm-top-row">
-                <span className={`rank r${Math.min(i + 1, 3)}`}>{i + 1}</span>
+                <span className={`rank r${Math.min(i + 1, 5)}`}>{i + 1}</span>
                 <Avatar text={c.initial} color={c.color} />
                 <div className="cm-top-info">
                   <b>{lang === 'he' ? c.he : c.en}</b>
@@ -202,18 +223,26 @@ export default function Customers() {
                     <i style={{ width: c.width, background: c.color }} />
                   </div>
                 </div>
-                <strong>{c.orders}</strong>
+                <strong>{c.orders} {t.cmOrders}</strong>
               </div>
             ))}
           </div>
-          <div className="cm-vbars">
-            {TOP.map((c) => (
-              <div key={`bar-${c.en}`} className="cm-vbar">
-                <span>{c.orders}</span>
-                <i style={{ height: `${(c.orders / 31) * 90}px`, background: c.color }} />
-                <small>{lang === 'he' ? c.he.split(' ')[0] : c.en.split(' ')[0]}</small>
-              </div>
-            ))}
+          <div className="cm-chart">
+            <div className="cm-y-axis">
+              <span>30</span>
+              <span>20</span>
+              <span>10</span>
+              <span>0</span>
+            </div>
+            <div className="cm-vbars">
+              {TOP.map((c) => (
+                <div key={`bar-${c.en}`} className="cm-vbar">
+                  <span>{c.orders}</span>
+                  <i style={{ height: `${(c.orders / 30) * 100}%`, background: c.color }} />
+                  <small>{lang === 'he' ? c.he : c.en}</small>
+                </div>
+              ))}
+            </div>
           </div>
         </article>
 
@@ -226,13 +255,20 @@ export default function Customers() {
               <span className="cm-d22">22%</span>
               <span className="cm-d18">18%</span>
             </div>
+            <div className="cm-legend">
+              {CITIES.map((c) => (
+                <span key={c.en}>
+                  <i style={{ background: c.color }} />
+                  {lang === 'he' ? c.he : c.en} {c.pct}%
+                </span>
+              ))}
+            </div>
           </div>
           <div className="cm-city-list">
-            {CITIES.map((c) => (
+            {CITY_COUNTS.map((c) => (
               <div key={c.en} className="cm-city-row">
                 <span className="cm-city-dot" style={{ background: c.color }} />
                 <b>{lang === 'he' ? c.he : c.en}</b>
-                <em>{c.pct}%</em>
                 <strong>{c.count}</strong>
               </div>
             ))}
