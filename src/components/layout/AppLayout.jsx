@@ -7,6 +7,14 @@ export default function AppLayout({ page, setPage, children }) {
   return <div className="app-shell">
     <Sidebar page={page} setPage={setPage} open={open} setOpen={setOpen} />
     {open && <button className="overlay" aria-label="Close menu" onClick={() => setOpen(false)} />}
-    <main><Header page={page} openMenu={() => setOpen(true)} />{children}</main>
+    <main className={page === 'support' ? 'main--support' : undefined}>
+      <Header page={page} openMenu={() => setOpen(true)} />
+      {page === 'support' && (
+        <button className="cs-mobile-menu" type="button" onClick={() => setOpen(true)} aria-label="Menu">
+          ☰
+        </button>
+      )}
+      {children}
+    </main>
   </div>
 }
