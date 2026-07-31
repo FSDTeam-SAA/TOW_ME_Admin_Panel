@@ -279,7 +279,7 @@ export const translations = {
     financeTitle: 'Financial Data',
     financeSubtitle: 'Complete financial overview — revenue, commissions and payments',
     exportReport: 'Export Report',
-    financeMetrics: [['$187,430', 'Total Revenue This Month', '12% from last month'], ['$134,950', 'Driver Commissions Paid', 'Out of $187,430'], ['$52,480', 'Net Profit', '8% from yesterday'], ['847', 'Orders This Month', '23 more than yesterday'], ['$221', 'Average Per Tow', '3% from last month']],
+    financeMetrics: [['₪187,430', 'Total Revenue This Month', '12% from last month'], ['₪134,950', 'Driver Commissions Paid', 'Out of ₪187,430'], ['₪52,480', 'Net Profit', '8% from yesterday'], ['847', 'Orders This Month', '23 more than yesterday'], ['₪221', 'Average Per Tow', '3% from last month']],
     incomeExpenses: 'Revenue vs Commissions',
     income: 'Revenue',
     expenses: 'Commissions',

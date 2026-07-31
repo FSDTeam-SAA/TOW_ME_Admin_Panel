@@ -2,7 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { ThemeContext } from './ThemeContext'
 
 export default function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('towme-theme') || 'light')
+  const [theme, setTheme] = useState(() => {
+    const requestedTheme = new URLSearchParams(window.location.search).get('theme')
+    return ['light', 'dark'].includes(requestedTheme)
+      ? requestedTheme
+      : (localStorage.getItem('towme-theme') || 'light')
+  })
 
   useEffect(() => {
     localStorage.setItem('towme-theme', theme)

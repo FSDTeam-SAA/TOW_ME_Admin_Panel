@@ -9,7 +9,12 @@ import CustomerSupport from './pages/CustomerSupport/CustomerSupport'
 import Customers from './pages/Customers/Customers'
 
 export default function App() {
-  const [page, setPage] = useState('dashboard')
+  const [page, setPage] = useState(() => {
+    const requestedPage = new URLSearchParams(window.location.search).get('page')
+    return ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support'].includes(requestedPage)
+      ? requestedPage
+      : 'dashboard'
+  })
   const pages = {
     settings: <Settings />,
     drivers: <DriverManagement />,

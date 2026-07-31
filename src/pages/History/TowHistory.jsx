@@ -1,7 +1,7 @@
 import React from 'react'
 import {
-  AlertTriangle, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight,
-  Download, Filter, Search, Star, Trophy, Truck,
+  AlertTriangle, CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
+  Download, Filter, Search, TrendingUp, Trophy,
 } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
@@ -20,33 +20,38 @@ const events = [
 ]
 
 const activityItems = [
-  [0, 'גרירה הושלמה', 'Tow completed', 'יוסי לוי · רחוב הרצל', 'Yossi Levi · Herzl St', '420'],
-  [1, 'ביטול הזמנה', 'Order cancelled', 'מוחמד ג׳בר · בוטל ע״י לקוח', 'Mohammed Jaber · customer cancelled', ''],
-  [2, 'גרירה בדרך', 'Tow en route', 'דוד ישראלי · כביש 1', 'David Israeli · Highway 1', ''],
-  [3, 'תקלה בגרירה', 'Tow issue', 'יוסי לוי · מוסך צפון', 'Yossi Levi · North Garage', ''],
+  [0, 'גרירה הושלמה', 'Tow completed', 'יוסי לוי · רחוב הרצל ← מוסך כרמי', 'Yossi Levi · Herzl St → Carmi Garage', '₪420', 'completed', 3],
+  [1, 'ביטול הזמנה', 'Order cancelled', 'מוחמד ג׳בר · ביטול על ידי לקוח', 'Mohammed Jaber · cancelled by customer', 'בוטל', 'cancelled', 8],
+  [2, 'גרירה בדרך', 'Tow en route', 'דוד ישראלי · כביש 1 ← חניון אלנבי', 'David Israeli · Highway 1 → Allenby Parking', 'בדרך', 'onway', 12],
+  [3, 'תקלה בגרירה', 'Tow issue', 'יוסי לוי · דיזנגוף 88 ← מוסך צפון', 'Yossi Levi · 88 Dizengoff → North Garage', 'תקלה', 'issue', 21],
 ]
-
-const typeIcons = [Truck, AlertTriangle, Truck, Trophy, Star]
 
 export default function TowHistory() {
   const { t, language } = useLanguage()
   const local = (he, en) => language === 'he' ? he : en
   const statusText = status => ({ completed: t.completed, cancelled: t.cancelled, onway: t.onWay, issue: t.issue, new: t.newStatus })[status]
+  const metricNote = index => {
+    if (index === 0) return <><b>+124</b><TrendingUp /><span>{language === 'he' ? 'החודש' : 'this month'}</span></>
+    if (index === 1) return <><b>91.5%</b><span>{language === 'he' ? 'אחוז הצלחה' : 'success rate'}</span></>
+    if (index === 2) return <><b>4.9%</b><span>{language === 'he' ? 'אחוז ביטול' : 'cancellation rate'}</span></>
+    return <><b>{language === 'he' ? 'דקות' : 'Minutes'}</b><span>{language === 'he' ? 'ממוצע לגרירה' : 'average per tow'}</span></>
+  }
 
   return <div className="content history-page">
     <div className="history-layout">
-      <aside className="panel activity-timeline"><div className="activity-title"><h2>{t.recentActivity}</h2><span>● {t.realtime}</span></div>{activityItems.map((item, i) => {
-        const Icon = typeIcons[item[0]]
-        return <div className="timeline-item" key={item[1]}><span className={`timeline-icon ti-${item[0]}`}><Icon /></span><div><b>{local(item[1], item[2])}</b><small>{local(item[3], item[4])}</small>{item[5] && <strong>{language === 'he' ? '₪' : '$'}{item[5]}</strong>}</div><em>{i * 4 + 3}m</em></div>
+      <aside className="panel activity-timeline"><div className="activity-title"><h2>{t.recentActivity}</h2><span>● {t.realtime}</span></div>{activityItems.map((item) => {
+        const timelineIcon = item[0] === 0 ? <img src="/assets/dashboard_icon/tikmark.png?v=2" alt="" /> : item[0] === 1 ? <AlertTriangle /> : item[0] === 2 ? <img src="/assets/dashboard_icon/truck.png?v=2" alt="" /> : <Trophy />
+        const badge = language === 'he' ? item[5] : ({ completed: '₪420', cancelled: 'Cancelled', onway: 'En Route', issue: 'Issue' })[item[6]]
+        return <div className="timeline-item" key={item[1]}><span className={`timeline-icon ti-${item[0]}`}>{timelineIcon}</span><div><b>{local(item[1], item[2])}</b><small>{local(item[3], item[4])}</small><strong className={`timeline-badge ${item[6]}`}>{badge}</strong></div><em>{language === 'he' ? `לפני ${item[7]} דק׳` : `${item[7]}m ago`}</em></div>
       })}</aside>
 
       <div className="history-main">
-        <section className="history-metrics">{t.historyMetrics.map((metric, i) => <article className="panel" key={metric[1]}><span className={`history-metric-icon hm-${i}`}>{i === 0 ? <Truck /> : i === 1 ? <Check /> : i === 2 ? <AlertTriangle /> : <Star />}</span><strong>{metric[0]}</strong><p>{metric[1]}</p><small>{metric[2]}</small></article>)}</section>
-        <section className="panel history-filters"><button className="outline"><Download />{t.excelExport}</button><button className="history-search-btn"><Filter />{t.filter}</button><label>{t.customerSearch}<Search /></label><label>{t.towSearch}<Search /></label><label>{t.allStatuses}<ChevronDown /></label><label><CalendarDays />{t.fromDate}</label><label><CalendarDays />{t.toDate}</label></section>
+        <section className="history-metrics">{t.historyMetrics.map((metric, i) => <article className="panel" key={metric[1]}><span className={`history-metric-icon hm-${i}`}>{i === 0 ? <img src="/assets/dashboard_icon/truck.png?v=2" alt="" /> : i === 1 ? <img src="/assets/dashboard_icon/tikmark.png?v=2" alt="" /> : i === 2 ? <AlertTriangle /> : <img src="/assets/dashboard_icon/star.png?v=2" alt="" />}</span><strong>{metric[0]}</strong><p>{metric[1]}</p><small>{metricNote(i)}</small></article>)}</section>
+        <section className="panel history-filters"><button className="outline"><Download />{t.excelExport}</button><button className="history-search-btn"><Filter />{t.filter}</button><label>{t.customerSearch}<Search /></label><label>{t.towSearch}<Search /></label><label>{t.allStatuses}<ChevronDown /></label><label><CalendarDays />{t.toDate}</label><label><CalendarDays />{t.fromDate}</label></section>
         <section className="panel history-tabs"><button className="active">{t.allActivities}</button><button>{t.towsTab}</button><button>{t.cancellationsTab}</button><button>{t.issuesTab}</button></section>
-        <section className="panel history-table"><div className="history-table-head"><h2>{t.activityLog}</h2><p>{t.historySummary}</p></div><div className="table-scroll"><table><thead><tr>{t.historyHeaders.map(h => <th key={h}>{h}</th>)}</tr></thead><tbody>{events.map((e, i) => {
-          const Icon = typeIcons[e[2]]
-          return <tr key={e[0] + e[1]}><td>{i + 1}</td><td><b>{e[0]}</b><small>{e[1]}</small></td><td><span className={`event-type et-${e[2]}`}><Icon />{t.actionTypes[e[2]]}</span></td><td className="driver-name"><Avatar text={e[3]} color={e[4]} /><b>{local(e[5], e[6])}</b></td><td>{local(e[7], e[8])}</td><td className="route-cell">{local(e[9], e[10])}</td><td>{e[11]} {e[11] !== '—' && 'km'}</td><td className="event-price">{e[12] === '—' ? '—' : `${language === 'he' ? '₪' : '$'}${e[12]}`}</td><td><span className={`event-status ${e[13]}`}>● {statusText(e[13])}</span></td><td><button className="event-details"><ChevronLeft /></button></td></tr>
+        <section className="panel history-table"><div className="history-table-head"><h2>{t.activityLog}</h2><p><b className="history-cancelled">189 {t.cancelled}</b><i /><b className="history-completed">3,521 {t.completed}</b><i /><span>{language === 'he' ? 'סה״כ 3,847 גרירות' : '3,847 total tows'}</span></p></div><div className="table-scroll"><table><thead><tr>{t.historyHeaders.map(h => <th key={h}>{h}</th>)}</tr></thead><tbody>{events.map((e, i) => {
+          const eventIcon = e[2] === 0 || e[2] === 2 ? <img src="/assets/dashboard_icon/truck.png?v=2" alt="" /> : e[2] === 1 ? <AlertTriangle /> : e[2] === 3 ? <Trophy /> : <img src="/assets/dashboard_icon/star.png?v=2" alt="" />
+          return <tr key={e[0] + e[1]}><td>{i + 1}</td><td><b>{e[0]}</b><small>{e[1]}</small></td><td><span className={`event-type et-${e[2]}`}>{eventIcon}{t.actionTypes[e[2]]}</span></td><td className="driver-name"><Avatar text={e[3]} color={e[4]} /><b>{local(e[5], e[6])}</b></td><td>{local(e[7], e[8])}</td><td className="route-cell">{local(e[9], e[10])}</td><td>{e[11]} {e[11] !== '—' && (language === 'he' ? 'ק״מ' : 'km')}</td><td className="event-price">{e[12] === '—' ? '—' : `₪${e[12]}`}</td><td><span className={`event-status ${e[13]}`}>● {statusText(e[13])}</span></td><td><button className="event-details"><ChevronLeft /></button></td></tr>
         })}</tbody></table></div><div className="driver-table-footer"><div className="driver-pagination"><button><ChevronRight /></button><button className="current">1</button><button>2</button><button>3</button><button>4</button><button>5</button><button><ChevronLeft /></button></div><span>{t.historyShowing}</span></div></section>
       </div>
     </div>
