@@ -7,14 +7,21 @@ import TowHistory from './pages/History/TowHistory'
 import Settings from './pages/Settings/Settings'
 import CustomerSupport from './pages/CustomerSupport/CustomerSupport'
 import Customers from './pages/Customers/Customers'
+import Login from './pages/Login/Login'
+import { useAuth } from './auth/AuthContext'
+import RealtimeProvider from './realtime/RealtimeProvider'
 
 export default function App() {
+  const { user } = useAuth()
   const [page, setPage] = useState(() => {
     const requestedPage = new URLSearchParams(window.location.search).get('page')
     return ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support'].includes(requestedPage)
       ? requestedPage
       : 'dashboard'
   })
+
+  if (!user) return <Login />
+
   const pages = {
     settings: <Settings />,
     drivers: <DriverManagement />,
@@ -23,7 +30,12 @@ export default function App() {
     support: <CustomerSupport />,
     customers: <Customers />,
   }
-  return <AppLayout page={page} setPage={setPage}>
-    {pages[page] || <Dashboard />}
-  </AppLayout>
+
+  return (
+    <RealtimeProvider>
+      <AppLayout page={page} setPage={setPage}>
+        {pages[page] || <Dashboard />}
+      </AppLayout>
+    </RealtimeProvider>
+  )
 }

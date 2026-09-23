@@ -1,102 +1,285 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
-  CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Download,
-  Filter, Search, X,
+  BadgeCheck, ChevronDown, Download, FileText, Lock, Search, ShieldAlert, X,
 } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
+import PageState from '../../components/common/PageState'
 import { useLanguage } from '../../i18n/LanguageContext'
+import { api } from '../../api/client'
+import useApiResource from '../../hooks/useApiResource'
+import { useRealtimeEvent } from '../../realtime/RealtimeContext'
+import {
+  avatarColor, downloadCsv, driverName, formatIls, initialsOf,
+} from '../../utils/format'
 
-const initialRows = [
-  ['YL', '#748174', 'יוסי לוי', 'Yossi Levi', '032-458-762', '050-123-4567', '12-345-67', 0, 142, 5, 'available'],
-  ['MJ', '#29231f', 'מוחמד ג׳בר', 'Mohammed Jaber', '045-678-123', '052-987-6543', '98-765-43', 1, 98, 4, 'unavailable'],
-  ['DI', '#6a6c4f', 'דוד ישראלי', 'David Israeli', '078-234-901', '054-321-7890', '55-444-11', 0, 217, 5, 'towing'],
-  ['AB', '#f16522', 'אריאל בן-דוד', 'Ariel Ben-David', '056-789-234', '053-456-7891', '77-213-88', 2, 83, 4, 'available'],
-  ['RA', '#416f7b', 'רמי אסחד', 'Rami Asad', '034-567-890', '058-112-3344', '33-901-55', 1, 176, 5, 'unavailable'],
-  ['NS', '#28241e', 'נדב שמואלי', 'Nadav Shmueli', '023-456-789', '055-678-9012', '44-102-76', 0, 59, 4, 'towing'],
-  ['SH', '#6a6c4f', 'סמי חסן', 'Sami Hassan', '089-123-456', '057-334-5566', '22-678-99', 2, 134, 5, 'available'],
-  ['EM', '#707a73', 'אלי מזרחי', 'Eli Mizrahi', '067-890-123', '052-889-0011', '88-532-14', 1, 47, 4, 'unavailable'],
+const LIVE_EVENTS = ['driver:updated']
+
+const DOCUMENTS = [
+  ['vehicleRegistration', 'vehicleLicense'],
+  ['insuranceDocument', 'mandatoryInsurance'],
+  ['cargoInsuranceDocument', 'cargoInsurance'],
+  ['thirdPartyInsuranceDocument', 'thirdPartyInsurance'],
 ]
 
-const metricIcons = ['truck.png', 'tikmark.png', 'isrial_currency.png', 'star.png']
+const missingDocuments = (driver) =>
+  DOCUMENTS.filter(([field]) => !driver?.[field]?.url)
 
 export default function DriverManagement() {
-  const { t, language } = useLanguage()
-  const [rows, setRows] = useState(initialRows)
+  const { t } = useLanguage()
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('all')
-  const [vehicle, setVehicle] = useState('all')
-  const [page, setPage] = useState(1)
-  const [addOpen, setAddOpen] = useState(false)
-  const [newDriver, setNewDriver] = useState({ name: '', id: '', phone: '', plate: '' })
-  const statusLabel = status => status === 'available' ? t.available : status === 'towing' ? t.towingNow : t.unavailable
-  const filteredRows = useMemo(() => rows.filter(row => {
-    const query = search.trim().toLowerCase()
-    const matchesSearch = !query || [row[2], row[3], row[4], row[5], row[6]].some(value => String(value).toLowerCase().includes(query))
-    const matchesStatus = status === 'all' || row[10] === status
-    const matchesVehicle = vehicle === 'all' || String(row[7]) === vehicle
-    return matchesSearch && matchesStatus && matchesVehicle
-  }), [rows, search, status, vehicle])
+  const [approval, setApproval] = useState('all')
+  const [detail, setDetail] = useState(null)
+  const [pendingAction, setPendingAction] = useState(null)
+  const [actionError, setActionError] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  const exportRows = () => {
-    const data = [t.driverPageHeaders.slice(0, 9), ...filteredRows.map((row, index) => [index + 1, language === 'he' ? row[2] : row[3], row[4], row[5], row[6], t.vehicleTypes[row[7]], row[8], row[9], statusLabel(row[10])])]
-    const csv = data.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n')
-    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'tow-me-drivers.csv'
-    link.click()
-    URL.revokeObjectURL(url)
+  const fetcher = useCallback(() => api.drivers({ limit: 200 }), [])
+  const { data, error, loading, reload } = useApiResource(fetcher)
+  useRealtimeEvent(LIVE_EVENTS, reload)
+
+  const drivers = useMemo(() => (Array.isArray(data) ? data : data?.drivers || []), [data])
+
+  const filtered = useMemo(() => drivers.filter((driver) => {
+    const query = search.trim().toLowerCase()
+    const matchesSearch = !query || [
+      driverName(driver), driver.phoneNumber, driver.licenseNumber, driver.email,
+    ].some((value) => String(value || '').toLowerCase().includes(query))
+
+    const matchesApproval =
+      approval === 'all' ||
+      (approval === 'approved' && driver.isVerified) ||
+      (approval === 'pending' && !driver.isVerified)
+
+    return matchesSearch && matchesApproval
+  }), [drivers, search, approval])
+
+  const pendingCount = useMemo(
+    () => drivers.filter((d) => !d.isVerified).length,
+    [drivers],
+  )
+
+  const runApproval = async (driver, approved, reason) => {
+    setBusy(true)
+    setActionError('')
+    try {
+      await api.setDriverApproval(driver._id, approved, reason)
+      await reload()
+      setPendingAction(null)
+      setDetail(null)
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const addDriver = event => {
-    event.preventDefault()
-    if (!newDriver.name || !newDriver.phone || !newDriver.plate) return
-    const next = ['ND', '#258ca8', newDriver.name, newDriver.name, newDriver.id || '000-000-000', newDriver.phone, newDriver.plate, 0, 0, 5, 'available']
-    setRows(current => [...current, next])
-    setNewDriver({ name: '', id: '', phone: '', plate: '' })
-    setAddOpen(false)
+  const toggleBlock = async (driver) => {
+    setBusy(true)
+    try {
+      await api.toggleDriverBlock(driver._id)
+      await reload()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const exportRows = () => downloadCsv('tow-me-drivers.csv', [
+    ['#', 'Name', 'Phone', 'License', 'Trips', 'Earnings', 'Approval', 'Documents'],
+    ...filtered.map((driver, index) => [
+      index + 1,
+      driverName(driver),
+      driver.phoneNumber,
+      driver.licenseNumber,
+      driver.totalTrips,
+      driver.totalEarnings,
+      driver.isVerified ? t.approved : t.pendingApproval,
+      missingDocuments(driver).length === 0 ? 'complete' : 'missing',
+    ]),
+  ])
+
+  if (loading || error) {
+    return <div className="content drivers-page">
+      <PageState loading={loading} error={error} onRetry={reload} t={t} />
+    </div>
   }
 
   return <div className="content drivers-page">
-    <section className="driver-metrics">
-      {t.driverMetrics.map((metric, index) => <article className="panel" key={metric[1]}>
-        <span className={`driver-metric-icon dm-${index}`}><img src={`/assets/dashboard_icon/${metricIcons[index]}?v=2`} alt="" /></span>
-        <strong>{metric[0]}</strong><p>{metric[1]}</p><small className={index === 0 || index === 3 ? 'positive' : ''}>{metric[2]}</small>
-      </article>)}
-    </section>
+    {pendingCount > 0 && <section className="panel approval-banner">
+      <ShieldAlert size={19} />
+      <b>{pendingCount}</b>
+      <span>{t.pendingApproval}</span>
+      <button onClick={() => setApproval('pending')}>{t.filter}</button>
+    </section>}
 
     <section className="panel driver-toolbar">
       <button className="outline" onClick={exportRows}><Download size={17} />{t.export}</button>
-      <button className="add-driver" onClick={() => setAddOpen(true)}><Filter size={17} />{t.addDriver}</button>
-      <label><select value={status} onChange={event => { setStatus(event.target.value); setPage(1) }}><option value="all">{t.allStatuses}</option><option value="available">{t.available}</option><option value="unavailable">{t.unavailable}</option><option value="towing">{t.towingNow}</option></select><ChevronDown size={16} /></label>
-      <label><select value={vehicle} onChange={event => { setVehicle(event.target.value); setPage(1) }}><option value="all">{t.vehicleType}</option>{t.vehicleTypes.map((type, index) => <option value={index} key={type}>{type}</option>)}</select><CalendarDays size={16} /></label>
-      <label className="driver-search"><input value={search} onChange={event => { setSearch(event.target.value); setPage(1) }} placeholder={t.driverSearch} /><Search size={18} /></label>
+      <label>
+        <select value={approval} onChange={(event) => setApproval(event.target.value)}>
+          <option value="all">{t.allStatuses}</option>
+          <option value="approved">{t.approved}</option>
+          <option value="pending">{t.pendingApproval}</option>
+        </select>
+        <ChevronDown size={16} />
+      </label>
+      <label className="driver-search">
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={t.driverSearch}
+        />
+        <Search size={18} />
+      </label>
     </section>
 
+    {actionError && <div className="login-error">{actionError}</div>}
+
     <section className="panel full-drivers-table">
-      <div className="full-drivers-head"><h2>{t.driversTableTitle}</h2><p>{t.driversCount}</p></div>
+      <div className="full-drivers-head">
+        <h2>{t.driversTableTitle}</h2>
+        <p>{filtered.length}</p>
+      </div>
       <div className="table-scroll"><table>
-        <thead><tr>{t.driverPageHeaders.map(h => <th key={h}>{h}</th>)}</tr></thead>
-        <tbody>{filteredRows.map((row, index) => <tr key={row[6]}>
-          <td>{index + 1}</td>
-          <td className="driver-name"><Avatar text={row[0]} color={row[1]} /><b>{language === 'he' ? row[2] : row[3]}</b></td>
-          <td>{row[4]}</td><td>{row[5]}</td><td><mark>{row[6]}</mark></td>
-          <td><span className={`vehicle-badge vehicle-${row[7]}`}>{t.vehicleTypes[row[7]]}</span></td>
-          <td><b>{row[8]}</b></td>
-          <td><span className="rating">{'★'.repeat(row[9])}<i>{'★'.repeat(5 - row[9])}</i></span></td>
-          <td><span className={`driver-status ${row[10]}`}>● {statusLabel(row[10])}</span></td>
-          <td><button className="details">{t.details}</button><button className="lock">{t.lock}</button></td>
-        </tr>)}</tbody>
+        <thead><tr>
+          <th>#</th><th>{t.headers[1]}</th><th>{t.phone}</th><th>{t.headers[4]}</th>
+          <th>{t.headers[5]}</th><th>{t.headers[6]}</th><th>{t.headers[7]}</th><th>{t.headers[8]}</th>
+        </tr></thead>
+        <tbody>
+          {filtered.length === 0
+            ? <tr><td colSpan={8} className="empty-row">{t.noResults}</td></tr>
+            : filtered.map((driver, index) => {
+                const missing = missingDocuments(driver)
+                return <tr key={driver._id}>
+                  <td>{index + 1}</td>
+                  <td className="driver-name">
+                    <Avatar text={initialsOf(driverName(driver))} color={avatarColor(driver._id)} />
+                    <b>{driverName(driver)}</b>
+                  </td>
+                  <td>{driver.phoneNumber}</td>
+                  <td><mark>{driver.licenseNumber || '—'}</mark></td>
+                  <td><b>{driver.totalTrips ?? 0}</b></td>
+                  <td><b>{formatIls(driver.totalEarnings)}</b></td>
+                  <td>
+                    <span className={`driver-status ${driver.isVerified ? 'available' : 'unavailable'}`}>
+                      ● {driver.isVerified ? t.approved : t.pendingApproval}
+                    </span>
+                    {missing.length > 0 && <small className="doc-warning">
+                      {missing.length} {t.documentsMissing}
+                    </small>}
+                  </td>
+                  <td className="row-actions">
+                    <button className="details" onClick={() => setDetail(driver)}>{t.details}</button>
+                    {driver.isVerified
+                      ? <button
+                          className="lock"
+                          disabled={busy}
+                          onClick={() => setPendingAction({ driver, approved: false })}
+                        >{t.reject}</button>
+                      : <button
+                          className="approve"
+                          disabled={busy}
+                          onClick={() => setPendingAction({ driver, approved: true })}
+                        ><BadgeCheck size={15} />{t.approve}</button>}
+                    <button className="lock" disabled={busy} onClick={() => toggleBlock(driver)}>
+                      <Lock size={14} />
+                    </button>
+                  </td>
+                </tr>
+              })}
+        </tbody>
       </table></div>
-      <div className="driver-table-footer"><div className="driver-pagination"><button onClick={() => setPage(value => Math.max(1, value - 1))}><ChevronRight /></button>{[1, 2, 3, 4].map(value => <button key={value} className={page === value ? 'current' : ''} onClick={() => setPage(value)}>{value}</button>)}<button onClick={() => setPage(value => Math.min(4, value + 1))}><ChevronLeft /></button></div><span>{t.driverPageShowing}</span></div>
     </section>
-    {addOpen && <div className="driver-modal-backdrop" onMouseDown={() => setAddOpen(false)}><form className="driver-modal" onSubmit={addDriver} onMouseDown={event => event.stopPropagation()}>
-      <div className="driver-modal-head"><h2>{t.addDriver}</h2><button type="button" onClick={() => setAddOpen(false)}><X /></button></div>
-      <label><span>{language === 'he' ? 'שם מלא' : 'Full Name'}</span><input value={newDriver.name} onChange={event => setNewDriver(current => ({ ...current, name: event.target.value }))} required /></label>
-      <label><span>{language === 'he' ? 'תעודת זהות' : 'ID Number'}</span><input value={newDriver.id} onChange={event => setNewDriver(current => ({ ...current, id: event.target.value }))} /></label>
-      <label><span>{t.phone}</span><input value={newDriver.phone} onChange={event => setNewDriver(current => ({ ...current, phone: event.target.value }))} required /></label>
-      <label><span>{language === 'he' ? 'לוחית רישוי' : 'License Plate'}</span><input value={newDriver.plate} onChange={event => setNewDriver(current => ({ ...current, plate: event.target.value }))} required /></label>
-      <button className="driver-modal-submit" type="submit">{t.addDriver}</button>
-    </form></div>}
+
+    {detail && <DriverDetail driver={detail} t={t} onClose={() => setDetail(null)} />}
+
+    {pendingAction && <ApprovalDialog
+      action={pendingAction}
+      t={t}
+      busy={busy}
+      onCancel={() => setPendingAction(null)}
+      onConfirm={(reason) => runApproval(pendingAction.driver, pendingAction.approved, reason)}
+    />}
+  </div>
+}
+
+function DriverDetail({ driver, t, onClose }) {
+  return <div className="driver-modal-backdrop" onMouseDown={onClose}>
+    <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="driver-modal-head">
+        <h2>{driverName(driver)}</h2>
+        <button type="button" onClick={onClose}><X /></button>
+      </div>
+
+      <div className="detail-grid">
+        <div><small>{t.phone}</small><b>{driver.phoneNumber}</b></div>
+        <div><small>{t.email}</small><b>{driver.email || '—'}</b></div>
+        <div><small>{t.headers[4]}</small><b>{driver.licenseNumber || '—'}</b></div>
+        <div><small>{t.headers[5]}</small><b>{driver.totalTrips ?? 0}</b></div>
+        <div><small>{t.headers[6]}</small><b>{formatIls(driver.totalEarnings)}</b></div>
+        <div>
+          <small>{t.headers[7]}</small>
+          <b>{driver.isVerified ? t.approved : t.pendingApproval}</b>
+        </div>
+      </div>
+
+      {driver.rejectionReason && <p className="login-error">{driver.rejectionReason}</p>}
+
+      <h3 className="detail-section">{t.documents}</h3>
+      <ul className="document-list">
+        {DOCUMENTS.map(([field, labelKey]) => {
+          const url = driver[field]?.url
+          return <li key={field}>
+            <FileText size={15} />
+            <span>{t[labelKey]}</span>
+            {url
+              ? <a href={url} target="_blank" rel="noreferrer">{t.viewDocument}</a>
+              : <em>{t.notUploaded}</em>}
+          </li>
+        })}
+      </ul>
+    </div>
+  </div>
+}
+
+function ApprovalDialog({ action, t, busy, onCancel, onConfirm }) {
+  const [reason, setReason] = useState('')
+  const { driver, approved } = action
+  const missing = missingDocuments(driver)
+
+  return <div className="driver-modal-backdrop" onMouseDown={onCancel}>
+    <form
+      className="driver-modal confirm-modal"
+      onMouseDown={(event) => event.stopPropagation()}
+      onSubmit={(event) => { event.preventDefault(); onConfirm(reason) }}
+    >
+      <div className="driver-modal-head">
+        <h2>{approved ? t.approve : t.reject}</h2>
+        <button type="button" onClick={onCancel}><X /></button>
+      </div>
+
+      <p>{approved ? t.approveConfirm : t.rejectConfirm}</p>
+      <b className="confirm-subject">{driverName(driver)}</b>
+
+      {approved && missing.length > 0 && <div className="login-error">
+        {t.documentsMissing}: {missing.map(([, key]) => t[key]).join(', ')}
+      </div>}
+
+      {!approved && <label>
+        <span>{t.rejectReason}</span>
+        <input value={reason} onChange={(event) => setReason(event.target.value)} />
+      </label>}
+
+      <div className="confirm-actions">
+        <button type="button" className="outline" onClick={onCancel}>{t.cancel}</button>
+        <button
+          type="submit"
+          className="driver-modal-submit"
+          disabled={busy || (approved && missing.length > 0)}
+        >
+          {busy ? t.loading : t.confirm}
+        </button>
+      </div>
+    </form>
   </div>
 }
