@@ -66,14 +66,15 @@ export default function TowHistory() {
   }
 
   const exportRows = () => downloadCsv('tow-me-bookings.csv', [
-    ['#', 'Booking', 'Customer', 'Driver', 'From', 'To', 'Price', 'Status', 'Created'],
+    ['#', 'Booking', 'Type', 'Customer', 'Driver', 'From', 'To', 'Price', 'Status', 'Created'],
     ...trips.map((trip, index) => [
       index + 1,
       trip.tripNumber,
+      trip.tripType === 'on_site' ? 'On-site call' : trip.tripType,
       trip.customerId?.name,
       driverName(trip.driverId),
-      trip.pickupAddress,
-      trip.dropoffAddress,
+      trip.pickupLocation?.address || trip.pickupAddress,
+      trip.dropoffLocation?.address || trip.dropoffAddress,
       trip.price,
       trip.status,
       formatDateTime(trip.createdAt),
@@ -135,20 +136,21 @@ export default function TowHistory() {
       </div>
       <div className="table-scroll"><table>
         <thead><tr>
-          <th>#</th><th>{t.nav[3]}</th><th>{t.cmHeaders[1]}</th><th>{t.headers[1]}</th>
+          <th>#</th><th>{t.nav[3]}</th><th>{t?.dir === 'rtl' ? 'סוג' : 'Type'}</th><th>{t.cmHeaders[1]}</th><th>{t.headers[1]}</th>
           <th>{t.fromDate}</th><th>{t.toDate}</th><th>{t.headers[6]}</th>
           <th>{t.headers[7]}</th><th>{t.headers[8]}</th>
         </tr></thead>
         <tbody>
           {trips.length === 0
-            ? <tr><td colSpan={9} className="empty-row">{t.noResults}</td></tr>
+            ? <tr><td colSpan={10} className="empty-row">{t.noResults}</td></tr>
             : trips.map((trip, index) => <tr key={trip._id}>
                 <td>{index + 1}</td>
                 <td><mark>#{trip.tripNumber}</mark><small>{formatDateTime(trip.createdAt)}</small></td>
+                <td>{trip.tripType === 'on_site' ? (t?.dir === 'rtl' ? 'שירות במקום' : 'On-site call') : (trip.tripType || 'Towing')}</td>
                 <td>{trip.customerId?.name || '—'}<small>{trip.customerId?.phoneNumber}</small></td>
                 <td>{driverName(trip.driverId)}</td>
-                <td className="address-cell">{trip.pickupAddress || '—'}</td>
-                <td className="address-cell">{trip.dropoffAddress || '—'}</td>
+                <td className="address-cell">{trip.pickupLocation?.address || trip.pickupAddress || '—'}</td>
+                <td className="address-cell">{trip.dropoffLocation?.address || trip.dropoffAddress || '—'}</td>
                 <td>
                   <b>{formatIls(trip.price)}</b>
                   {trip.cancellationFee > 0 && <small className="doc-warning">

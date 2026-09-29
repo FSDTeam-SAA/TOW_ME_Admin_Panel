@@ -136,7 +136,7 @@ export default function Dashboard() {
                 </span>
                 <div>
                   <b>#{trip.tripNumber} · {trip.customerId?.name || '—'}</b>
-                  <small>{trip.pickupAddress} · {formatDateTime(trip.createdAt)}</small>
+                  <small>{trip.pickupLocation?.address || trip.pickupAddress} · {formatDateTime(trip.createdAt)}</small>
                 </div>
                 <strong className={cancelled ? 'cancelled' : ''}>
                   {cancelled ? statusLabel(trip.status, t) : formatIls(trip.price)}
