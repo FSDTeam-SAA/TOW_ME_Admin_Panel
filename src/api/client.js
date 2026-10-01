@@ -55,21 +55,20 @@ async function request(path, { method = 'GET', body, query } = {}) {
   const token = getToken()
   const headers = {}
   if (token) headers.Authorization = `Bearer ${token}`
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (body !== undefined && !(body instanceof FormData)) headers['Content-Type'] = 'application/json'
 
   let response
   try {
     response = await fetch(url, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
     throw new ApiError('Cannot reach the server. Check your connection.', 0)
   }
 
-  if (response.status === 401 || response.status === 403) {
-    // A 403 on an admin-only route means the session is no longer valid.
+  if (response.status === 401) {
     if (getToken()) onUnauthorized.forEach((handler) => handler())
   }
 
@@ -96,21 +95,36 @@ async function request(path, { method = 'GET', body, query } = {}) {
 }
 
 export const api = {
-  login: (email, password) =>
-    request('/auth/admin/login', { method: 'POST', body: { email, password } }),
+  login: (username, password) =>
+    request('/auth/admin/login', { method: 'POST', body: { username, password } }),
+  requestPasswordReset: (phoneNumber) => request('/auth/forget-password', { method: 'POST', body: { phoneNumber } }),
+  resetPassword: (phoneNumber, otp, password) => request('/auth/reset-password', {
+    method: 'POST', body: { phoneNumber, otp, password, confirmPassword: password },
+  }),
+  logout: () => request('/auth/logout', { method: 'POST' }),
+  currentAdmin: () => request('/auth/admin/me'),
+  updateAdminProfile: (profile) =>
+    request('/auth/admin/profile', { method: 'PATCH', body: profile }),
+  changeAdminCredential: (currentPassword, newPassword) =>
+    request('/auth/admin/credential', { method: 'PATCH', body: { currentPassword, newPassword } }),
+  managers: () => request('/auth/admin/managers'),
+  createManager: (manager) => request('/auth/admin/managers', { method: 'POST', body: manager }),
+  updateManager: (id, manager) => request(`/auth/admin/managers/${id}`, { method: 'PATCH', body: manager }),
 
   dashboard: () => request('/analytics/dashboard'),
   financials: (query) => request('/analytics/financials', { query }),
 
   drivers: (query) => request('/drivers', { query }),
+  createDriver: (form) => request('/drivers', { method: 'POST', body: form }),
+  updateDriver: (id, form) => request(`/drivers/${id}`, { method: 'PUT', body: form }),
   driver: (id) => request(`/drivers/${id}`),
   setDriverApproval: (id, approved, reason) =>
     request(`/drivers/${id}/approval`, {
       method: 'PATCH',
       body: { approved, reason },
     }),
-  toggleDriverBlock: (id) =>
-    request(`/drivers/${id}/toggle-block`, { method: 'PATCH' }),
+  toggleDriverBlock: (id, code) =>
+    request(`/drivers/${id}/toggle-block`, { method: 'PATCH', body: { code } }),
 
   trips: (query) => request('/trips', { query }),
   trip: (id) => request(`/trips/${id}`),
@@ -123,6 +137,7 @@ export const api = {
     }),
 
   customers: (query) => request('/customers', { query }),
+  customer: (id) => request(`/customers/${id}`),
   toggleCustomerBlock: (id) =>
     request(`/customers/${id}/toggle-block`, { method: 'PATCH' }),
   toggleCustomerVip: (id) =>
@@ -131,7 +146,7 @@ export const api = {
   tickets: (query) => request('/support', { query }),
   ticket: (id) => request(`/support/${id}`),
   replyToTicket: (id, content) =>
-    request(`/support/${id}/reply`, { method: 'POST', body: { content } }),
+    request(`/support/${id}/reply`, { method: 'POST', body: { message: content } }),
   setTicketStatus: (id, status) =>
     request(`/support/${id}/status`, { method: 'PATCH', body: { status } }),
 

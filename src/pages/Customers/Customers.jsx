@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Crown, Download, Lock, Search } from 'lucide-react'
+import { Crown, Download, Lock, Search, X } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import PageState from '../../components/common/PageState'
+import TripHistoryList from '../../components/common/TripHistoryList'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { api } from '../../api/client'
 import useApiResource from '../../hooks/useApiResource'
@@ -12,14 +13,27 @@ import {
 const TABS = ['all', 'active', 'vip', 'blocked']
 
 export default function Customers() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('all')
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState('')
+  const [detail, setDetail] = useState(null)
+
+  const openDetail = async (customer) => {
+    setActionError('')
+    try {
+      const response = await api.customer(customer._id)
+      setDetail(response.data)
+    } catch (err) {
+      setActionError(err.message)
+    }
+  }
 
   const fetcher = useCallback(() => api.customers({ limit: 200 }), [])
-  const { data, error, loading, reload } = useApiResource(fetcher)
+  const { data, error, loading, reload } = useApiResource(fetcher, {
+    queryKey: ['customers'],
+  })
 
   const customers = useMemo(() => data?.customers || [], [data])
   const stats = data?.stats
@@ -62,7 +76,7 @@ export default function Customers() {
       customer.city,
       formatDate(customer.createdAt),
       customer.totalTrips ?? 0,
-      customer.totalSpent ?? 0,
+      customer.totalPaid ?? 0,
       customer.isBlocked ? 'blocked' : customer.isVip ? 'VIP' : 'active',
     ]),
   ])
@@ -140,13 +154,14 @@ export default function Customers() {
                 <td>{customer.email || '—'}</td>
                 <td>{formatDate(customer.createdAt)}</td>
                 <td><b>{customer.totalTrips ?? 0}</b></td>
-                <td><b>{formatIls(customer.totalSpent)}</b></td>
+                <td><b>{formatIls(customer.totalPaid)}</b></td>
                 <td>
                   <span className={`driver-status ${customer.isBlocked ? 'unavailable' : 'available'}`}>
                     ● {customer.isBlocked ? t.cmBlocked : t.cmActive}
                   </span>
                 </td>
                 <td className="row-actions">
+                  <button className="details" onClick={() => openDetail(customer)}>{t.details}</button>
                   <button
                     className="details"
                     disabled={busy === customer._id}
@@ -162,5 +177,20 @@ export default function Customers() {
         </tbody>
       </table></div>
     </section>
+    {detail && <div className="driver-modal-backdrop" onMouseDown={() => setDetail(null)}>
+      <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="driver-modal-head"><h2>{detail.customer?.name}</h2><button onClick={() => setDetail(null)}><X /></button></div>
+        <div className="detail-grid">
+          <div><small>{t.phone}</small><b>{detail.customer?.phoneNumber}</b></div>
+          <div><small>{t.email}</small><b>{detail.customer?.email || '—'}</b></div>
+          <div><small>{t.city || 'City'}</small><b>{detail.customer?.city || '—'}</b></div>
+          <div><small>{t.financeTitle}</small><b>{formatIls(detail.totalPaid)}</b></div>
+        </div>
+        <h3 className="detail-section">{t.historyTitle}</h3>
+        <div className="driver-trip-history">
+          <TripHistoryList trips={detail.trips} t={t} language={language} />
+        </div>
+      </div>
+    </div>}
   </div>
 }

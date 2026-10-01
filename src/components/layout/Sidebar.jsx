@@ -6,11 +6,14 @@ import {
 import Avatar from '../common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { asset } from '../../utils/asset'
+import { useAuth } from '../../auth/AuthContext'
 
 const icons = [LayoutDashboard, Truck, CircleDollarSign, ClipboardList, Users, Settings, Headset]
+const permissions = ['dashboard', 'drivers', 'finance', 'trips', 'customers', 'settings', 'support']
 
 export default function Sidebar({ page, setPage, open, setOpen }) {
   const { t } = useLanguage()
+  const { user, logout } = useAuth()
   const openPage = (index) => {
     if (index === 0) setPage('dashboard')
     if (index === 1) setPage('drivers')
@@ -25,8 +28,10 @@ export default function Sidebar({ page, setPage, open, setOpen }) {
   return <aside className={open ? 'sidebar sidebar--open' : 'sidebar'}>
     <button className="mobile-close" onClick={() => setOpen(false)} aria-label="Close"><X /></button>
     <div className="logo"><img src={asset("assets/dashboard_icon/logo.png?v=1")} alt="TOW ME" /><small>{t.panel}</small></div>
-    <div className="side-profile"><Avatar text="AC" color="#f16522" large /><div><b>{t.adminName}</b><span>{t.adminRole}</span></div></div>
+    <div className="side-profile"><Avatar text={user?.name || 'Admin'} color="#f16522" large /><div><b>{user?.name || t.adminName}</b><span>{user?.isMasterAdmin ? t.adminRole : t.managerRole}</span></div></div>
     <nav>{t.nav.map((label, index) => {
+      if (user?.mustChangePin && index !== 5) return null
+      if (!user?.isMasterAdmin && index !== 5 && !user?.adminPermissions?.includes(permissions[index])) return null
       const Icon = icons[index]
       const active = (index === 0 && page === 'dashboard')
         || (index === 1 && page === 'drivers')
@@ -37,6 +42,7 @@ export default function Sidebar({ page, setPage, open, setOpen }) {
         || (index === 6 && page === 'support')
       return <button key={label} className={active ? 'nav-item active' : 'nav-item'} onClick={() => openPage(index)}><Icon size={18} /><span>{label}</span></button>
     })}</nav>
-    <button className="logout"><LogOut size={17} />{t.logout}</button>
+    <button className="logout" onClick={logout}>{t.switchManager || 'Switch administrator'}</button>
+    <button className="logout" onClick={logout}><LogOut size={17} />{t.logout}</button>
   </aside>
 }

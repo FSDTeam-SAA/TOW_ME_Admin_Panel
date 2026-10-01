@@ -30,7 +30,9 @@ export default function CustomerSupport() {
     () => api.tickets({ limit: 100, status: status === 'all' ? undefined : status }),
     [status],
   )
-  const { data, error, loading, reload } = useApiResource(listFetcher)
+  const { data, error, loading, reload } = useApiResource(listFetcher, {
+    queryKey: ['tickets', { status }],
+  })
 
   const tickets = useMemo(() => data?.tickets || [], [data])
   const stats = data?.stats
@@ -55,7 +57,10 @@ export default function CustomerSupport() {
     () => (selectedId ? api.ticket(selectedId) : Promise.resolve({ data: null })),
     [selectedId],
   )
-  const { data: ticket, reload: reloadTicket } = useApiResource(detailFetcher)
+  const { data: detail, error: detailError, loading: detailLoading, reload: reloadTicket } = useApiResource(detailFetcher, {
+    queryKey: ['ticket', selectedId], immediate: Boolean(selectedId),
+  })
+  const ticket = detail?.ticket
 
   const threadRef = useRef(null)
   useEffect(() => {
@@ -158,7 +163,7 @@ export default function CustomerSupport() {
 
       <article className="panel ticket-thread">
         {!ticket
-          ? <p className="empty-row">{t.noResults}</p>
+          ? <p className="empty-row">{detailLoading ? t.loading : detailError?.message || t.noResults}</p>
           : <>
               <div className="thread-head">
                 <div>

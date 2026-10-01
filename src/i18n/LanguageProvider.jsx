@@ -9,9 +9,7 @@ export default function LanguageProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('towme-language', language)
     document.documentElement.lang = language
-    // The product layout is intentionally fixed to the reference's RTL
-    // structure. Changing language translates copy without moving UI blocks.
-    document.documentElement.dir = 'rtl'
+    document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr'
   }, [language])
 
   const value = useMemo(() => ({ language, setLanguage, t }), [language, t])

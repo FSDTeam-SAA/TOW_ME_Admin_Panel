@@ -12,19 +12,35 @@ import { useAuth } from './auth/AuthContext'
 import RealtimeProvider from './realtime/RealtimeProvider'
 
 export default function App() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const [page, setPage] = useState(() => {
     const requestedPage = new URLSearchParams(window.location.search).get('page')
     return ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support'].includes(requestedPage)
       ? requestedPage
       : 'dashboard'
   })
+  const [focusedDriverId, setFocusedDriverId] = useState(null)
+
+  const manageDriver = (id) => {
+    setFocusedDriverId(id)
+    setPage('drivers')
+  }
 
   if (!user) return <Login />
 
+  const allowedPages = user.mustChangePin ? ['settings'] : user.isMasterAdmin
+    ? ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support']
+    : ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support']
+      .filter((item) => item === 'settings' || (user.adminPermissions || []).includes({ history: 'trips' }[item] || item))
+  const currentPage = allowedPages.includes(page) ? page : allowedPages[0]
+  if (!currentPage) return <div className="login-page"><div className="login-card panel">
+    <p>No administrator permissions have been granted yet.</p>
+    <button className="login-submit" onClick={logout}>Switch administrator</button>
+  </div></div>
+
   const pages = {
     settings: <Settings />,
-    drivers: <DriverManagement />,
+    drivers: <DriverManagement initialDriverId={focusedDriverId} />,
     finance: <FinancialData />,
     history: <TowHistory />,
     support: <CustomerSupport />,
@@ -33,8 +49,8 @@ export default function App() {
 
   return (
     <RealtimeProvider>
-      <AppLayout page={page} setPage={setPage}>
-        {pages[page] || <Dashboard />}
+      <AppLayout page={currentPage} setPage={setPage}>
+        {pages[currentPage] || <Dashboard onManageDrivers={manageDriver} />}
       </AppLayout>
     </RealtimeProvider>
   )

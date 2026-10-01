@@ -10,7 +10,7 @@ import {
   avatarColor, downloadCsv, formatDateTime, formatIls, initialsOf,
 } from '../../utils/format'
 
-const LIVE_EVENTS = ['trip:updated']
+const LIVE_EVENTS = ['trip:updated', 'driver:updated']
 const PERIODS = ['week', 'month', 'year']
 
 export default function FinancialData() {
@@ -20,7 +20,9 @@ export default function FinancialData() {
   const [busy, setBusy] = useState('')
 
   const fetcher = useCallback(() => api.financials({ period }), [period])
-  const { data, error, loading, reload } = useApiResource(fetcher)
+  const { data, error, loading, reload } = useApiResource(fetcher, {
+    queryKey: ['financials', { period }], staleTime: 30_000,
+  })
   useRealtimeEvent(LIVE_EVENTS, reload)
 
   const summary = data?.summary
@@ -55,7 +57,7 @@ export default function FinancialData() {
 
   const periodLabel = (key) => ({
     week: t.thisWeek,
-    month: t.lastMonth,
+    month: t.thisMonth,
     year: t.financeTitle,
   })[key] || key
 
@@ -66,12 +68,13 @@ export default function FinancialData() {
   }
 
   return <div className="content drivers-page">
-    <section className="driver-metrics">
+    <section className="driver-metrics finance-summary-metrics">
       {[
         [formatIls(summary?.totalRevenue), t.financeTitle],
         [formatIls(summary?.totalCommission), t.headers[6]],
         [formatIls(summary?.totalDriverEarnings), t.topDrivers],
         [summary?.totalTransactions ?? 0, t.cmOrders],
+        [formatIls(data?.pendingSummary?.amount), t.pendingCollection || 'Pending collection'],
       ].map(([value, label]) => <article className="panel" key={label}>
         <strong>{value}</strong><p>{label}</p>
       </article>)}

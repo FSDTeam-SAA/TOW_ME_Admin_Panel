@@ -1,11 +1,13 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  BadgeCheck, ChevronDown, Download, FileText, Lock, Search, ShieldAlert, X,
+  BadgeCheck, ChevronDown, Download, FileText, Lock, Search, ShieldAlert, UserPlus, X,
 } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import PageState from '../../components/common/PageState'
+import TripHistoryList from '../../components/common/TripHistoryList'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { api } from '../../api/client'
+import { useAuth } from '../../auth/AuthContext'
 import useApiResource from '../../hooks/useApiResource'
 import { useRealtimeEvent } from '../../realtime/RealtimeContext'
 import {
@@ -23,18 +25,35 @@ const DOCUMENTS = [
 
 const missingDocuments = (driver) =>
   DOCUMENTS.filter(([field]) => !driver?.[field]?.url)
+const isLocked = (driver) => Boolean(driver.isBlocked || driver.userId?.isBlocked)
 
-export default function DriverManagement() {
-  const { t } = useLanguage()
+export default function DriverManagement({ initialDriverId }) {
+  const { t, language } = useLanguage()
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [approval, setApproval] = useState('all')
+  const [city, setCity] = useState('')
   const [detail, setDetail] = useState(null)
+  const [editing, setEditing] = useState(null)
+  const [detailError, setDetailError] = useState('')
   const [pendingAction, setPendingAction] = useState(null)
+  const [lockAction, setLockAction] = useState(null)
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const fetcher = useCallback(() => api.drivers({ limit: 200 }), [])
-  const { data, error, loading, reload } = useApiResource(fetcher)
+  useEffect(() => {
+    if (!initialDriverId) return
+    let active = true
+    api.driver(initialDriverId)
+      .then((response) => { if (active) setDetail(response.data) })
+      .catch((err) => { if (active) setDetailError(err.message) })
+    return () => { active = false }
+  }, [initialDriverId])
+
+  const fetcher = useCallback(() => api.drivers({ limit: 200, city: city.trim() || undefined }), [city])
+  const { data, error, loading, reload } = useApiResource(fetcher, {
+    queryKey: ['drivers', { city }],
+  })
   useRealtimeEvent(LIVE_EVENTS, reload)
 
   const drivers = useMemo(() => (Array.isArray(data) ? data : data?.drivers || []), [data])
@@ -47,14 +66,15 @@ export default function DriverManagement() {
 
     const matchesApproval =
       approval === 'all' ||
-      (approval === 'approved' && driver.isVerified) ||
-      (approval === 'pending' && !driver.isVerified)
+      (approval === 'approved' && driver.isVerified && !isLocked(driver)) ||
+      (approval === 'pending' && !driver.isVerified && !isLocked(driver)) ||
+      (approval === 'locked' && isLocked(driver))
 
     return matchesSearch && matchesApproval
   }), [drivers, search, approval])
 
   const pendingCount = useMemo(
-    () => drivers.filter((d) => !d.isVerified).length,
+    () => drivers.filter((d) => !d.isVerified && !isLocked(d)).length,
     [drivers],
   )
 
@@ -73,11 +93,39 @@ export default function DriverManagement() {
     }
   }
 
-  const toggleBlock = async (driver) => {
+  const toggleBlock = async (driver, code) => {
     setBusy(true)
+    setActionError('')
     try {
-      await api.toggleDriverBlock(driver._id)
+      await api.toggleDriverBlock(driver._id, code)
       await reload()
+      setLockAction(null)
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const openDetail = async (driver) => {
+    setDetailError('')
+    try {
+      const response = await api.driver(driver._id)
+      setDetail(response.data)
+    } catch (err) {
+      setDetailError(err.message)
+    }
+  }
+
+  const saveDriver = async (form) => {
+    setBusy(true)
+    setActionError('')
+    try {
+      if (editing._id) await api.updateDriver(editing._id, form)
+      else await api.createDriver(form)
+      await reload()
+      setEditing(null)
+      setDetail(null)
     } catch (err) {
       setActionError(err.message)
     } finally {
@@ -94,7 +142,7 @@ export default function DriverManagement() {
       driver.licenseNumber,
       driver.totalTrips,
       driver.totalEarnings,
-      driver.isVerified ? t.approved : t.pendingApproval,
+      isLocked(driver) ? (t.locked || 'Locked') : driver.isVerified ? t.approved : t.pendingApproval,
       missingDocuments(driver).length === 0 ? 'complete' : 'missing',
     ]),
   ])
@@ -110,16 +158,18 @@ export default function DriverManagement() {
       <ShieldAlert size={19} />
       <b>{pendingCount}</b>
       <span>{t.pendingApproval}</span>
-      <button onClick={() => setApproval('pending')}>{t.filter}</button>
+      <button onClick={() => setApproval('pending')}>{t.enter || 'Enter'}</button>
     </section>}
 
     <section className="panel driver-toolbar">
+      {user?.isMasterAdmin && <button className="outline" onClick={() => setEditing({})}><UserPlus size={17} />{t.addDriver || 'Add driver'}</button>}
       <button className="outline" onClick={exportRows}><Download size={17} />{t.export}</button>
       <label>
         <select value={approval} onChange={(event) => setApproval(event.target.value)}>
           <option value="all">{t.allStatuses}</option>
           <option value="approved">{t.approved}</option>
           <option value="pending">{t.pendingApproval}</option>
+          <option value="locked">{t.locked || 'Locked'}</option>
         </select>
         <ChevronDown size={16} />
       </label>
@@ -131,9 +181,14 @@ export default function DriverManagement() {
         />
         <Search size={18} />
       </label>
+      <label className="driver-search">
+        <input value={city} onChange={(event) => setCity(event.target.value)} placeholder={t.city || 'City'} />
+        <Search size={18} />
+      </label>
     </section>
 
     {actionError && <div className="login-error">{actionError}</div>}
+    {detailError && <div className="login-error">{detailError}</div>}
 
     <section className="panel full-drivers-table">
       <div className="full-drivers-head">
@@ -161,16 +216,18 @@ export default function DriverManagement() {
                   <td><b>{driver.totalTrips ?? 0}</b></td>
                   <td><b>{formatIls(driver.totalEarnings)}</b></td>
                   <td>
-                    <span className={`driver-status ${driver.isVerified ? 'available' : 'unavailable'}`}>
-                      ● {driver.isVerified ? t.approved : t.pendingApproval}
+                    <span className={`driver-status ${driver.isVerified && !isLocked(driver) ? 'available' : 'unavailable'}`}>
+                      ● {isLocked(driver) ? (t.locked || 'Locked') : driver.isVerified ? t.approved : t.pendingApproval}
                     </span>
                     {missing.length > 0 && <small className="doc-warning">
                       {missing.length} {t.documentsMissing}
                     </small>}
                   </td>
                   <td className="row-actions">
-                    <button className="details" onClick={() => setDetail(driver)}>{t.details}</button>
-                    {driver.isVerified
+                    <button className="details" onClick={() => openDetail(driver)}>{t.details}</button>
+                    {isLocked(driver)
+                      ? null
+                      : driver.isVerified
                       ? <button
                           className="lock"
                           disabled={busy}
@@ -181,8 +238,8 @@ export default function DriverManagement() {
                           disabled={busy}
                           onClick={() => setPendingAction({ driver, approved: true })}
                         ><BadgeCheck size={15} />{t.approve}</button>}
-                    <button className="lock" disabled={busy} onClick={() => toggleBlock(driver)}>
-                      <Lock size={14} />
+                    <button className="lock" disabled={busy} onClick={() => setLockAction(driver)}>
+                      <Lock size={14} />{isLocked(driver) ? (t.unlock || 'Unlock') : (t.lock || 'Lock')}
                     </button>
                   </td>
                 </tr>
@@ -191,7 +248,8 @@ export default function DriverManagement() {
       </table></div>
     </section>
 
-    {detail && <DriverDetail driver={detail} t={t} onClose={() => setDetail(null)} />}
+    {detail && <DriverDetail driver={detail.driver} trips={detail.recentTrips} t={t} language={language} onClose={() => setDetail(null)} onEdit={() => { setEditing(detail.driver); setDetail(null) }} />}
+    {editing && <DriverForm driver={editing} t={t} busy={busy} onClose={() => setEditing(null)} onSave={saveDriver} />}
 
     {pendingAction && <ApprovalDialog
       action={pendingAction}
@@ -200,15 +258,32 @@ export default function DriverManagement() {
       onCancel={() => setPendingAction(null)}
       onConfirm={(reason) => runApproval(pendingAction.driver, pendingAction.approved, reason)}
     />}
+    {lockAction && <ManagerCodeDialog driver={lockAction} t={t} busy={busy}
+      onCancel={() => setLockAction(null)} onConfirm={(code) => toggleBlock(lockAction, code)} />}
   </div>
 }
 
-function DriverDetail({ driver, t, onClose }) {
+function ManagerCodeDialog({ driver, t, busy, onCancel, onConfirm }) {
+  const [code, setCode] = useState('')
+  return <div className="driver-modal-backdrop" onMouseDown={onCancel}>
+    <form className="driver-modal confirm-modal" onMouseDown={(event) => event.stopPropagation()}
+      onSubmit={(event) => { event.preventDefault(); onConfirm(code) }}>
+      <div className="driver-modal-head"><h2>{isLocked(driver) ? (t.unlock || 'Unlock') : (t.lock || 'Lock')} {driverName(driver)}</h2>
+        <button type="button" onClick={onCancel}><X /></button></div>
+      <label><span>{t.managerCode || 'Manager PIN or password'}</span>
+        <input type="password" required autoFocus value={code} onChange={(event) => setCode(event.target.value)} /></label>
+      <div className="confirm-actions"><button type="button" className="outline" onClick={onCancel}>{t.cancel}</button>
+        <button type="submit" className="driver-modal-submit" disabled={busy}>{busy ? t.loading : t.confirm}</button></div>
+    </form>
+  </div>
+}
+
+function DriverDetail({ driver, trips = [], t, language, onClose, onEdit }) {
   return <div className="driver-modal-backdrop" onMouseDown={onClose}>
     <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
       <div className="driver-modal-head">
         <h2>{driverName(driver)}</h2>
-        <button type="button" onClick={onClose}><X /></button>
+        <div><button type="button" className="details" onClick={onEdit}>{t.edit || 'Edit'}</button><button type="button" onClick={onClose}><X /></button></div>
       </div>
 
       <div className="detail-grid">
@@ -219,7 +294,7 @@ function DriverDetail({ driver, t, onClose }) {
         <div><small>{t.headers[6]}</small><b>{formatIls(driver.totalEarnings)}</b></div>
         <div>
           <small>{t.headers[7]}</small>
-          <b>{driver.isVerified ? t.approved : t.pendingApproval}</b>
+          <b>{isLocked(driver) ? (t.locked || 'Locked') : driver.isVerified ? t.approved : t.pendingApproval}</b>
         </div>
       </div>
 
@@ -238,7 +313,49 @@ function DriverDetail({ driver, t, onClose }) {
           </li>
         })}
       </ul>
+      <h3 className="detail-section">{t.historyTitle}</h3>
+      <div className="driver-trip-history">
+        <TripHistoryList trips={trips} t={t} language={language} />
+      </div>
     </div>
+  </div>
+}
+
+function DriverForm({ driver, t, busy, onClose, onSave }) {
+  const isEdit = Boolean(driver._id)
+  const [values, setValues] = useState({
+    firstName: driver.firstName || '', lastName: driver.lastName || '',
+    phoneNumber: driver.phoneNumber || '', email: driver.email || '',
+    vehicleType: driver.vehicleType || 'regular', licenseNumber: driver.licenseNumber || '',
+    operatingArea: (driver.operatingArea || []).join(', '), password: '',
+  })
+  const [files, setFiles] = useState({})
+  const setValue = (field, value) => setValues((current) => ({ ...current, [field]: value }))
+  const submit = (event) => {
+    event.preventDefault()
+    const form = new FormData()
+    Object.entries(values).forEach(([key, value]) => {
+      if (key === 'operatingArea') form.set(key, JSON.stringify(value.split(',').map((part) => part.trim()).filter(Boolean)))
+      else if (value || key !== 'password') form.set(key, value)
+    })
+    Object.entries(files).forEach(([key, file]) => { if (file) form.set(key, file) })
+    onSave(form)
+  }
+
+  return <div className="driver-modal-backdrop" onMouseDown={onClose}>
+    <form className="driver-modal" onMouseDown={(event) => event.stopPropagation()} onSubmit={submit}>
+      <div className="driver-modal-head"><h2>{isEdit ? (t.edit || 'Edit driver') : (t.addDriver || 'Add driver')}</h2><button type="button" onClick={onClose}><X /></button></div>
+      <div className="driver-form-grid">
+        {[
+          ['firstName', 'First name'], ['lastName', 'Last name'], ['phoneNumber', t.phone],
+          ['email', t.email], ['licenseNumber', 'License plate'], ['operatingArea', t.city || 'City / operating areas'],
+        ].map(([field, label]) => <label key={field}><span>{label}</span><input value={values[field]} onChange={(event) => setValue(field, event.target.value)} required={['firstName', 'lastName', 'phoneNumber', 'licenseNumber'].includes(field)} /></label>)}
+        <label><span>Vehicle type</span><select value={values.vehicleType} onChange={(event) => setValue('vehicleType', event.target.value)}><option value="regular">Regular</option><option value="flatbed">Flatbed</option><option value="heavy">Heavy</option></select></label>
+        {!isEdit && <label><span>Password</span><input type="password" minLength={6} required value={values.password} onChange={(event) => setValue('password', event.target.value)} /></label>}
+        {DOCUMENTS.map(([field, label]) => <label key={field}><span>{t[label]}</span><input type="file" accept="image/*,.pdf" onChange={(event) => setFiles((current) => ({ ...current, [field]: event.target.files?.[0] }))} /></label>)}
+      </div>
+      <div className="confirm-actions"><button type="button" className="outline" onClick={onClose}>{t.cancel}</button><button type="submit" className="driver-modal-submit" disabled={busy}>{busy ? t.loading : t.save}</button></div>
+    </form>
   </div>
 }
 

@@ -29,7 +29,9 @@ export default function TowHistory() {
     toDate: filters.to || undefined,
   }), [filters])
 
-  const { data, error, loading, reload } = useApiResource(fetcher)
+  const { data, error, loading, reload } = useApiResource(fetcher, {
+    queryKey: ['trips', filters],
+  })
   useRealtimeEvent(LIVE_EVENTS, reload)
 
   const trips = useMemo(() => data?.trips || [], [data])
@@ -217,7 +219,9 @@ function CancelDialog({ trip, t, busy, onCancel, onConfirm }) {
 function AssignDialog({ trip, t, busy, onCancel, onConfirm }) {
   const [driverId, setDriverId] = useState('')
   const fetcher = useCallback(() => api.drivers({ limit: 200 }), [])
-  const { data, loading } = useApiResource(fetcher)
+  const { data, loading } = useApiResource(fetcher, {
+    queryKey: ['drivers', { limit: 200 }],
+  })
 
   // Only approved, unblocked drivers can take a job.
   const options = useMemo(

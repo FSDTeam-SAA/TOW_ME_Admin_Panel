@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { AlertTriangle, Trophy } from 'lucide-react'
+import { AlertTriangle, Trophy, X } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { api } from '../../api/client'
@@ -11,6 +11,11 @@ import { asset } from '../../utils/asset'
 
 const dashboardIcons = ['truck.png', 'isrial_currency.png', 'tikmark.png', 'star.png']
 const LIVE_EVENTS = ['trip:created', 'trip:updated', 'driver:updated']
+
+function DetailField({ label, value }) {
+  if (value === undefined || value === null || value === '') return null
+  return <div><small>{label}</small><b>{value}</b></div>
+}
 
 function MetricIcon({ index }) {
   return <div className={`metric-icon ${['peach', 'silver', 'mint', 'ice'][index]}`}>
@@ -74,12 +79,26 @@ function Donut({ distribution, t }) {
   </div>
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onManageDrivers }) {
   const { t, language } = useLanguage()
   const [chartPeriod, setChartPeriod] = useState('week')
+  const [selectedTrip, setSelectedTrip] = useState(null)
+  const [detailError, setDetailError] = useState('')
+
+  const openTrip = async (id) => {
+    setDetailError('')
+    try {
+      const response = await api.trip(id)
+      setSelectedTrip(response.data)
+    } catch (err) {
+      setDetailError(err.message)
+    }
+  }
 
   const fetcher = useCallback(() => api.dashboard(), [])
-  const { data, error, loading, reload } = useApiResource(fetcher)
+  const { data, error, loading, refreshing, reload } = useApiResource(fetcher, {
+    queryKey: ['dashboard'], staleTime: 30_000,
+  })
 
   useRealtimeEvent(LIVE_EVENTS, reload)
 
@@ -98,6 +117,7 @@ export default function Dashboard() {
   }
 
   return <div className="content dashboard-page">
+    {refreshing && <span className="sr-only" role="status">{t.loading}</span>}
     <section className="stats">{metrics.map((metric, i) => <article key={metric[1]}>
       <MetricIcon index={i} />
       {i === 1
@@ -130,7 +150,7 @@ export default function Dashboard() {
           ? <p className="empty-row">{t.noResults}</p>
           : data.recentTrips.map(trip => {
               const cancelled = trip.status === 'cancelled'
-              return <div className="activity" key={trip._id}>
+              return <button type="button" className="activity activity-button" key={trip._id} onClick={() => openTrip(trip._id)}>
                 <span className={`activity-icon ${cancelled ? 'danger' : 'peach'}`}>
                   {cancelled ? <AlertTriangle /> : <img src={asset("assets/dashboard_icon/truck.png?v=2")} alt="" />}
                 </span>
@@ -141,7 +161,7 @@ export default function Dashboard() {
                 <strong className={cancelled ? 'cancelled' : ''}>
                   {cancelled ? statusLabel(trip.status, t) : formatIls(trip.price)}
                 </strong>
-              </div>
+              </button>
             })}
       </article>
 
@@ -152,15 +172,60 @@ export default function Dashboard() {
             ? <p className="empty-row">{t.noResults}</p>
             : data.topDrivers.map((driver, i) => {
                 const name = `${driver.firstName || ''} ${driver.lastName || ''}`.trim()
-                return <div className="leader" key={driver._id}>
+                return <button type="button" className="leader leader-button" key={driver._id} onClick={() => onManageDrivers(driver._id)}>
                   <span className={`rank r${i + 1}`}>{i + 1}</span>
                   <Avatar text={initialsOf(name)} color={avatarColor(driver._id)} />
                   <div><b>{name}</b><small>{driver.totalTrips} {t.towCount}</small></div>
                   <strong>{formatIls(driver.totalEarnings)}</strong>
-                </div>
+                  <span>{t.details}</span>
+                </button>
               })}
         </div>
       </article>
     </section>
+    {detailError && <div className="login-error">{detailError}</div>}
+    {selectedTrip && <div className="driver-modal-backdrop" onMouseDown={() => setSelectedTrip(null)}>
+      <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="driver-modal-head"><h2>#{selectedTrip.tripNumber}</h2><button onClick={() => setSelectedTrip(null)}><X /></button></div>
+        <div className="detail-grid">
+          <div><small>{t.cmHeaders[1]}</small><b>{selectedTrip.customerId?.name || '—'}</b></div>
+          <DetailField label={t.towDetail.contactName} value={selectedTrip.contactInfo?.name || selectedTrip.customerId?.name} />
+          <DetailField label={t.towDetail.contactLastFour} value={(selectedTrip.contactInfo?.phoneNumber || selectedTrip.customerId?.phoneNumber || '').replace(/\D/g, '').slice(-4) || '—'} />
+          <div><small>{t.tripType || 'Type'}</small><b>{selectedTrip.tripType || '—'}</b></div>
+          <div><small>{t.fromDate}</small><b>{formatDateTime(selectedTrip.createdAt)}</b></div>
+          <div><small>{t.headers[4]}</small><b>{selectedTrip.vehicleInfo?.licensePlate || '—'}</b></div>
+          <div><small>{t.vehicle || 'Vehicle'}</small><b>{[selectedTrip.vehicleInfo?.make, selectedTrip.vehicleInfo?.model].filter(Boolean).join(' ') || '—'}</b></div>
+          <DetailField label={t.towDetail.vehicleType} value={selectedTrip.vehicleInfo?.type} />
+          <DetailField label={t.towDetail.vehicleColor} value={selectedTrip.vehicleInfo?.color} />
+          <DetailField label={t.towDetail.vehicleYear} value={selectedTrip.vehicleInfo?.year} />
+          <div><small>{t.headers[7]}</small><b>{statusLabel(selectedTrip.status, t)}</b></div>
+          <div><small>{t.financeTitle}</small><b>{formatIls(selectedTrip.price)}</b></div>
+          <DetailField label={t.towDetail.paymentMethod} value={selectedTrip.paymentMethod || '—'} />
+          <DetailField label={t.towDetail.paymentStatus} value={selectedTrip.paymentStatus || '—'} />
+          <DetailField label={t.towDetail.bookingSource} value={selectedTrip.bookingSource || '—'} />
+          <div><small>Pickup</small><b>{selectedTrip.pickupLocation?.address || '—'}</b></div>
+          <div><small>Destination</small><b>{selectedTrip.dropoffLocation?.address || '—'}</b></div>
+          <div><small>{t.driverManagement}</small><b>{[selectedTrip.driverId?.firstName, selectedTrip.driverId?.lastName].filter(Boolean).join(' ') || '—'}</b></div>
+          <DetailField label={t.towDetail.driverPhone} value={selectedTrip.driverId?.phoneNumber} />
+          <DetailField label={t.towDetail.distance} value={selectedTrip.estimatedDistance ? `${selectedTrip.estimatedDistance} ${t.towDetail.kilometers}` : null} />
+          <DetailField label={t.towDetail.duration} value={selectedTrip.estimatedDuration ? `${selectedTrip.estimatedDuration} ${t.towDetail.minutes}` : null} />
+          <DetailField label={t.towDetail.acceptedAt} value={selectedTrip.acceptedAt && formatDateTime(selectedTrip.acceptedAt)} />
+          <DetailField label={t.towDetail.arrivedAt} value={selectedTrip.arrivedAt && formatDateTime(selectedTrip.arrivedAt)} />
+          <DetailField label={t.towDetail.startedAt} value={selectedTrip.startedAt && formatDateTime(selectedTrip.startedAt)} />
+          <DetailField label={t.towDetail.completedAt} value={selectedTrip.completedAt && formatDateTime(selectedTrip.completedAt)} />
+          <DetailField label={t.towDetail.cancelledAt} value={selectedTrip.cancelledAt && formatDateTime(selectedTrip.cancelledAt)} />
+          <DetailField label={t.towDetail.cancellationFee} value={selectedTrip.cancellationFee ? formatIls(selectedTrip.cancellationFee) : null} />
+          <DetailField label={t.towDetail.cancellationReason} value={selectedTrip.cancellationReason} />
+          <DetailField label={t.towDetail.notes} value={selectedTrip.notes} />
+          <DetailField label={t.towDetail.completionComments} value={selectedTrip.completionReport?.comments} />
+        </div>
+        {selectedTrip.destinationHistory?.length > 0 && <div className="driver-trip-history">
+          <h3 className="detail-section">{t.towDetail.destinationHistory}</h3>
+          {selectedTrip.destinationHistory.map((entry, index) => <p key={`${entry.changedAt || ''}-${index}`}>
+            {entry.address} · {formatIls(entry.price)} · {entry.changedAt ? formatDateTime(entry.changedAt) : ''}
+          </p>)}
+        </div>}
+      </div>
+    </div>}
   </div>
 }
