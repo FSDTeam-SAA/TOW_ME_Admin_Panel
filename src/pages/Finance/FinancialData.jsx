@@ -1,5 +1,6 @@
+import SelectField from '../../components/common/SelectField'
 import React, { useCallback, useMemo, useState } from 'react'
-import { ChevronDown, Download } from 'lucide-react'
+import { Download } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import PageState from '../../components/common/PageState'
 import { useLanguage } from '../../i18n/LanguageContext'
@@ -58,7 +59,7 @@ export default function FinancialData() {
   const periodLabel = (key) => ({
     week: t.thisWeek,
     month: t.thisMonth,
-    year: t.financeTitle,
+    year: t.thisYear,
   })[key] || key
 
   if (loading || error) {
@@ -83,10 +84,9 @@ export default function FinancialData() {
     <section className="panel driver-toolbar">
       <button className="outline" onClick={exportRows}><Download size={17} />{t.export}</button>
       <label>
-        <select value={period} onChange={(event) => setPeriod(event.target.value)}>
+        <SelectField aria-label={t.timePeriod} value={period} onChange={(event) => setPeriod(event.target.value)}>
           {PERIODS.map((key) => <option value={key} key={key}>{periodLabel(key)}</option>)}
-        </select>
-        <ChevronDown size={16} />
+        </SelectField>
       </label>
     </section>
 

@@ -95,6 +95,8 @@ async function request(path, { method = 'GET', body, query } = {}) {
 }
 
 export const api = {
+  terms: () => request('/terms'),
+  publishTerms: (body) => request('/terms', { method: 'PUT', body }),
   login: (username, password) =>
     request('/auth/admin/login', { method: 'POST', body: { username, password } }),
   requestPasswordReset: (phoneNumber) => request('/auth/forget-password', { method: 'POST', body: { phoneNumber } }),

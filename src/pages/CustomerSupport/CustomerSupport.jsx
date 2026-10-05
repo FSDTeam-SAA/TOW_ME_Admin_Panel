@@ -1,3 +1,4 @@
+import SelectField from '../../components/common/SelectField'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Crown, Search, Send } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
@@ -170,7 +171,8 @@ export default function CustomerSupport() {
                   <b>{ticket.customerId?.name || '—'}</b>
                   <small>#{ticket.ticketNumber} · {ticket.subject}</small>
                 </div>
-                <select
+                <SelectField
+                  aria-label={t.allStatuses}
                   value={ticket.status}
                   disabled={busy}
                   onChange={(event) => changeStatus(event.target.value)}
@@ -178,7 +180,7 @@ export default function CustomerSupport() {
                   {STATUSES.filter((s) => s !== 'all').map((s) => (
                     <option value={s} key={s}>{statusText(s, t)}</option>
                   ))}
-                </select>
+                </SelectField>
               </div>
 
               <div className="thread-messages" ref={threadRef}>
