@@ -13,6 +13,7 @@ export default function Header({ page, openMenu }) {
 
   const titles = {
     settings: [t.settings, t.settingsSubtitle],
+    terms: [t.termsOfUse, t.termsSubtitle],
     drivers: [t.driversPageTitle, t.driversPageSubtitle],
     finance: [t.financeTitle, t.financeSubtitle],
     history: [t.historyTitle, t.historySubtitle],

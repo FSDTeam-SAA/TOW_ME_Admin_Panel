@@ -3417,3 +3417,240 @@ button.approve:disabled { opacity: .55; cursor: default; }
 .login-lockout { display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 11px; color: #9a6410; background: #fdf6e8; border: 1px solid #f3dcae; text-align: start; }
 .login-lockout span { flex: 1; font-size: 12.5px; line-height: 1.4; }
 .login-lockout b { font-variant-numeric: tabular-nums; font-size: 14px; }
+
+.terms-editor-card { margin-top: 24px; }
+.terms-editor-card input { width: 100%; margin: 12px 0; padding: 12px; }
+.terms-quill { margin: 16px 0; }
+.terms-quill .ql-editor { min-height: 360px; text-align: right; line-height: 1.7; }
+.terms-quill .ql-toolbar { direction: ltr; }
+.terms-editor-card .save-button { margin: 12px 8px; }
+
+/* Profile names stay beside the avatar; only initials belong in the circle. */
+.avatar { overflow: hidden; white-space: nowrap; line-height: 1; text-align: center; }
+.profile-editor > .avatar,
+.app-shell .sidebar .side-profile > .avatar { color: #fff; font-size: 12px; }
+.profile-editor > .avatar { width: 44px; height: 44px; }
+.profile-editor > div { min-width: 0; gap: 4px; }
+.profile-editor > div > b { overflow-wrap: anywhere; }
+.side-profile > div { min-width: 0; flex: 1; gap: 4px; }
+.side-profile > div > b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-profile > div > span { line-height: 1.4; }
+
+/* Administrator modal: contain scrolling between a fixed header and footer. */
+.managers-card .settings-card-head .manager-add-button {
+  flex-shrink: 0;
+  margin: 0;
+  min-height: 44px;
+  justify-content: center;
+  box-shadow: none;
+}
+.driver-modal.manager-form { padding: 0; gap: 0; overflow: hidden; }
+.driver-modal.manager-form .driver-modal-head { position: static; margin: 0; padding: 20px 24px; }
+.driver-modal.manager-form .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; }
+.driver-modal.manager-form .confirm-actions { position: static; margin: 0; padding: 18px 24px; gap: 12px; }
+.driver-modal.manager-form .confirm-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; box-shadow: none; font-weight: 600; }
+.driver-modal.manager-form .confirm-actions .outline { background: transparent; color: #183a60; border: 1px solid #bccbd8; }
+.driver-modal.manager-form .confirm-actions .driver-modal-submit { background: #f26722; color: #fff; border: 1px solid #f26722; }
+.driver-modal.manager-form .confirm-actions .driver-modal-submit:hover { background: #dc5819; }
+.driver-modal.manager-form .confirm-actions .driver-modal-submit:disabled { opacity: .6; cursor: wait; }
+.driver-modal.manager-form .manager-setup-help { margin: 20px 0; padding: 14px 16px; border-radius: 10px; background: #e5eef5; color: #48627d; font-size: 13px; line-height: 1.65; }
+.driver-modal.manager-form .manager-permissions { margin: 0; padding: 16px; gap: 10px; }
+.driver-modal.manager-form .manager-permissions legend { padding-inline: 8px; font-size: 14px; font-weight: 600; }
+.driver-modal.manager-form .manager-permissions label { display: flex; min-height: 44px; padding: 10px 12px; gap: 10px; border-radius: 8px; background: #f7fafc; font-size: 13px; cursor: pointer; }
+.driver-modal.manager-form .manager-permissions label:has(:checked) { background: #e6f3f8; }
+.driver-modal.manager-form .manager-permissions input[type="checkbox"] {
+  appearance: auto;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  flex: 0 0 18px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #1684a6;
+  cursor: pointer;
+}
+[data-theme="dark"] .driver-modal.manager-form .manager-permissions label,
+[data-theme="dark"] .driver-modal.manager-form .manager-setup-help { background: #243442; color: #e6eef5; }
+[data-theme="dark"] .driver-modal.manager-form .manager-permissions label:has(:checked) { background: #1c485d; }
+[data-theme="dark"] .driver-modal.manager-form .confirm-actions .outline { background: transparent; color: #e6eef5; border-color: #647c90; }
+@media (max-width: 480px) {
+  .driver-modal.manager-form .driver-modal-head, .driver-modal.manager-form .modal-body, .driver-modal.manager-form .confirm-actions { padding: 16px; }
+  .driver-modal.manager-form .manager-permissions { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+  .driver-modal.manager-form .confirm-actions { flex-direction: column-reverse; }
+  .managers-card .settings-card-head { flex-wrap: wrap; }
+}
+
+/* A shared native select keeps keyboard controls and the whole field clickable. */
+.content .admin-select {
+  display: block;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  color: #183a60;
+}
+.content .admin-select > select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  height: 100%;
+  appearance: none;
+  padding: 10px 14px;
+  padding-inline-end: 42px;
+  border: 1px solid #cbd8e3;
+  border-radius: 10px;
+  background: #f7fafc;
+  color: #183a60;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+}
+.content .admin-select > svg {
+  position: absolute;
+  inset-inline-end: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #58718b;
+}
+.content .admin-select > select:hover { border-color: #809cb5; }
+.content .admin-select > select:focus { border-color: #2394b5; box-shadow: 0 0 0 3px rgba(35, 148, 181, .14); }
+.content .admin-select > select:disabled { opacity: .6; cursor: not-allowed; }
+.content .admin-select option { background: #fff; color: #183a60; }
+.driver-toolbar label:has(> .admin-select),
+.filters label:has(> .admin-select) { padding: 0; border: 0; box-shadow: none; background: transparent; }
+.driver-toolbar label:has(> .admin-select) { flex: 0 1 210px; min-width: 180px; }
+.driver-toolbar, .filters, .history-filters { flex-wrap: wrap; overflow: visible; }
+.driver-toolbar .driver-search, .filters .search-field { min-width: min(250px, 100%); }
+.driver-toolbar .driver-search:focus-within,
+.driver-toolbar .date-field:focus-within { border-color: #2394b5; outline: 2px solid rgba(35, 148, 181, .14); }
+.driver-toolbar input { color: #183a60; font-size: 14px; }
+.driver-toolbar .date-field { min-width: 175px; }
+.thread-head .admin-select { width: auto; min-width: 150px; flex-shrink: 0; }
+.cm-status-tabs { flex-wrap: wrap; }
+[data-theme="dark"] .content .admin-select > select { background: #1b2833 !important; color: #e6eef5 !important; border-color: #526677; }
+[data-theme="dark"] .content .admin-select option { background: #1b2833; color: #e6eef5; }
+[data-theme="dark"] .content .admin-select > svg { color: #afc4d5; }
+[data-theme="dark"] .driver-toolbar input { color: #e6eef5; }
+@media (max-width: 760px) {
+  .driver-toolbar, .filters { padding: 16px; gap: 12px; }
+  .driver-toolbar label, .driver-toolbar label:has(> .admin-select),
+  .driver-toolbar .driver-search, .driver-toolbar .date-field,
+  .filters label, .filters .search-field { min-width: 0; width: 100%; flex: 1 1 100%; }
+  .driver-toolbar .outline { flex: 1 1 auto; }
+  .thread-head { flex-wrap: wrap; gap: 12px; }
+}
+
+/* Shared modal sizing, scrolling and actions. */
+.driver-modal-backdrop { padding: 24px; overflow: hidden; }
+.driver-modal {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 48px);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  gap: 16px;
+  box-shadow: 0 24px 64px rgba(14, 36, 53, .24);
+}
+.driver-modal > * { flex-shrink: 0; }
+.driver-modal .driver-modal-head {
+  position: sticky; top: -24px; z-index: 2; gap: 16px;
+  margin: -24px -24px 0; padding: 20px 24px;
+  background: inherit; border-bottom: 1px solid #dfe7ee;
+}
+.driver-modal-head h2 { margin: 0; min-width: 0; overflow-wrap: anywhere; line-height: 1.4; }
+.driver-modal-head button { width: 38px; height: 38px; flex-shrink: 0; }
+.driver-modal-head .modal-header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.driver-modal-head .modal-edit-button { width: auto; min-width: 72px; padding: 0 16px; font-size: 13px; font-weight: 700; background: #183a60; color: #fff; }
+.driver-modal button:focus-visible { outline: 2px solid #f26722; outline-offset: 3px; }
+.driver-modal .confirm-actions {
+  position: sticky; bottom: -24px; z-index: 2;
+  margin: 0 -24px -24px; padding: 16px 24px 24px;
+  border-top: 1px solid #dfe7ee; background: inherit;
+}
+.driver-modal .confirm-actions button { margin-top: 0; padding-inline: 14px; min-width: 0; font-size: 13px; }
+.driver-modal.confirm-modal { width: min(480px, 100%); }
+.driver-modal.driver-edit-modal, .driver-modal.manager-form { width: min(720px, 100%); }
+.driver-modal .driver-form-grid { max-height: none; overflow: visible; }
+.driver-modal .detail-grid > div { min-width: 0; align-content: start; }
+.driver-modal .detail-grid b { overflow-wrap: anywhere; line-height: 1.5; white-space: pre-wrap; }
+.driver-modal .document-list { padding: 0; margin: 14px 0 20px; }
+.driver-modal .document-list li { flex-wrap: wrap; }
+.driver-modal .document-list li span { min-width: 0; overflow-wrap: anywhere; }
+.driver-modal .document-list li a, .driver-modal .document-list li em { flex-shrink: 0; }
+.driver-modal.details-modal { width: min(820px, 100%); padding: 0; gap: 0; overflow: hidden; }
+.driver-modal.details-modal .driver-modal-head { position: static; margin: 0; padding: 20px 24px; }
+.details-modal .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px 24px; }
+.details-modal .driver-trip-history { max-height: none; overflow: visible; margin-top: 16px; }
+.details-modal .detail-grid { margin-bottom: 18px; }
+[data-theme="dark"] .driver-modal .driver-modal-head,
+[data-theme="dark"] .driver-modal .confirm-actions { border-color: rgba(105, 126, 143, .2); }
+[data-theme="dark"] .driver-modal-head .modal-edit-button { background: #2584ac !important; color: #fff; }
+@media (max-width: 480px) {
+  .driver-modal-backdrop { padding: 12px; }
+  .driver-modal { padding: 16px; max-height: calc(100dvh - 24px); border-radius: 16px; }
+  .driver-modal .driver-modal-head { top: -16px; margin: -16px -16px 0; padding: 16px; gap: 10px; }
+  .driver-modal.details-modal .driver-modal-head { margin: 0; padding: 16px; }
+  .driver-modal .confirm-actions { bottom: -16px; margin: 0 -16px -16px; padding: 16px; }
+  .details-modal .modal-body { padding: 16px; }
+  .driver-modal .driver-form-grid, .driver-modal .detail-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Dashboard trip details: keep the header visible while long records scroll. */
+.trip-details-backdrop { padding: 24px; overflow: hidden; }
+.driver-modal.trip-details-modal {
+  width: min(860px, 100%);
+  max-height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(14, 36, 53, .24);
+}
+.trip-details-modal .driver-modal-head {
+  flex: 0 0 auto;
+  padding: 20px 24px;
+  margin: 0;
+  border-bottom: 1px solid #dfe7ee;
+}
+.trip-details-modal .driver-modal-head h2 { margin: 0; font-size: 20px; }
+.trip-details-modal .driver-modal-head button { width: 38px; height: 38px; flex-shrink: 0; }
+.trip-details-modal .driver-modal-head button:focus-visible { outline: 2px solid #f26722; outline-offset: 3px; }
+.trip-details-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 20px 24px 24px;
+}
+.trip-details-modal .detail-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.trip-details-modal .detail-grid > div { min-width: 0; padding: 12px 14px; gap: 6px; align-content: start; }
+.trip-details-modal .detail-grid small { line-height: 1.4; }
+.trip-details-modal .detail-grid b { line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; text-align: start; }
+.trip-details-modal .trip-details-wide { grid-column: 1 / -1; }
+.trip-details-modal .driver-trip-history { margin-top: 20px; overflow-wrap: anywhere; }
+[data-theme="dark"] .trip-details-modal .driver-modal-head { border-color: rgba(105, 126, 143, .2); }
+@media (max-width: 720px) {
+  .trip-details-modal .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .trip-details-backdrop { padding: 12px; }
+  .driver-modal.trip-details-modal { max-height: calc(100dvh - 24px); border-radius: 16px; }
+  .trip-details-modal .driver-modal-head { padding: 16px; }
+  .trip-details-body { padding: 16px; }
+  .trip-details-modal .detail-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}

@@ -178,8 +178,9 @@ export default function Customers() {
       </table></div>
     </section>
     {detail && <div className="driver-modal-backdrop" onMouseDown={() => setDetail(null)}>
-      <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="driver-modal-head"><h2>{detail.customer?.name}</h2><button onClick={() => setDetail(null)}><X /></button></div>
+      <div className="driver-modal details-modal" role="dialog" aria-modal="true" aria-labelledby="customer-detail-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="driver-modal-head"><h2 id="customer-detail-title">{detail.customer?.name}</h2><button type="button" aria-label={t.close} onClick={() => setDetail(null)}><X /></button></div>
+        <div className="modal-body">
         <div className="detail-grid">
           <div><small>{t.phone}</small><b>{detail.customer?.phoneNumber}</b></div>
           <div><small>{t.email}</small><b>{detail.customer?.email || '—'}</b></div>
@@ -189,6 +190,7 @@ export default function Customers() {
         <h3 className="detail-section">{t.historyTitle}</h3>
         <div className="driver-trip-history">
           <TripHistoryList trips={detail.trips} t={t} language={language} />
+        </div>
         </div>
       </div>
     </div>}
