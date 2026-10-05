@@ -1,6 +1,7 @@
+import SelectField from '../../components/common/SelectField'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  BadgeCheck, ChevronDown, Download, FileText, Lock, Search, ShieldAlert, UserPlus, X,
+  BadgeCheck, Download, FileText, Lock, Search, ShieldAlert, UserPlus, X,
 } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import PageState from '../../components/common/PageState'
@@ -165,13 +166,12 @@ export default function DriverManagement({ initialDriverId }) {
       {user?.isMasterAdmin && <button className="outline" onClick={() => setEditing({})}><UserPlus size={17} />{t.addDriver || 'Add driver'}</button>}
       <button className="outline" onClick={exportRows}><Download size={17} />{t.export}</button>
       <label>
-        <select value={approval} onChange={(event) => setApproval(event.target.value)}>
+        <SelectField aria-label={t.allStatuses} value={approval} onChange={(event) => setApproval(event.target.value)}>
           <option value="all">{t.allStatuses}</option>
           <option value="approved">{t.approved}</option>
           <option value="pending">{t.pendingApproval}</option>
           <option value="locked">{t.locked || 'Locked'}</option>
-        </select>
-        <ChevronDown size={16} />
+        </SelectField>
       </label>
       <label className="driver-search">
         <input
@@ -280,12 +280,12 @@ function ManagerCodeDialog({ driver, t, busy, onCancel, onConfirm }) {
 
 function DriverDetail({ driver, trips = [], t, language, onClose, onEdit }) {
   return <div className="driver-modal-backdrop" onMouseDown={onClose}>
-    <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
+    <div className="driver-modal details-modal" role="dialog" aria-modal="true" aria-labelledby="driver-detail-title" onMouseDown={(event) => event.stopPropagation()}>
       <div className="driver-modal-head">
-        <h2>{driverName(driver)}</h2>
-        <div><button type="button" className="details" onClick={onEdit}>{t.edit || 'Edit'}</button><button type="button" onClick={onClose}><X /></button></div>
+        <h2 id="driver-detail-title">{driverName(driver)}</h2>
+        <div className="modal-header-actions"><button type="button" className="modal-edit-button" onClick={onEdit}>{t.edit || 'Edit'}</button><button type="button" aria-label={t.close} onClick={onClose}><X /></button></div>
       </div>
-
+      <div className="modal-body">
       <div className="detail-grid">
         <div><small>{t.phone}</small><b>{driver.phoneNumber}</b></div>
         <div><small>{t.email}</small><b>{driver.email || '—'}</b></div>
@@ -317,6 +317,7 @@ function DriverDetail({ driver, trips = [], t, language, onClose, onEdit }) {
       <div className="driver-trip-history">
         <TripHistoryList trips={trips} t={t} language={language} />
       </div>
+      </div>
     </div>
   </div>
 }
@@ -343,14 +344,14 @@ function DriverForm({ driver, t, busy, onClose, onSave }) {
   }
 
   return <div className="driver-modal-backdrop" onMouseDown={onClose}>
-    <form className="driver-modal" onMouseDown={(event) => event.stopPropagation()} onSubmit={submit}>
+    <form className="driver-modal driver-edit-modal" onMouseDown={(event) => event.stopPropagation()} onSubmit={submit}>
       <div className="driver-modal-head"><h2>{isEdit ? (t.edit || 'Edit driver') : (t.addDriver || 'Add driver')}</h2><button type="button" onClick={onClose}><X /></button></div>
       <div className="driver-form-grid">
         {[
           ['firstName', 'First name'], ['lastName', 'Last name'], ['phoneNumber', t.phone],
           ['email', t.email], ['licenseNumber', 'License plate'], ['operatingArea', t.city || 'City / operating areas'],
         ].map(([field, label]) => <label key={field}><span>{label}</span><input value={values[field]} onChange={(event) => setValue(field, event.target.value)} required={['firstName', 'lastName', 'phoneNumber', 'licenseNumber'].includes(field)} /></label>)}
-        <label><span>Vehicle type</span><select value={values.vehicleType} onChange={(event) => setValue('vehicleType', event.target.value)}><option value="regular">Regular</option><option value="flatbed">Flatbed</option><option value="heavy">Heavy</option></select></label>
+        <label><span>Vehicle type</span><SelectField value={values.vehicleType} onChange={(event) => setValue('vehicleType', event.target.value)}><option value="regular">Regular</option><option value="flatbed">Flatbed</option><option value="heavy">Heavy</option></SelectField></label>
         {!isEdit && <label><span>Password</span><input type="password" minLength={6} required value={values.password} onChange={(event) => setValue('password', event.target.value)} /></label>}
         {DOCUMENTS.map(([field, label]) => <label key={field}><span>{t[label]}</span><input type="file" accept="image/*,.pdf" onChange={(event) => setFiles((current) => ({ ...current, [field]: event.target.files?.[0] }))} /></label>)}
       </div>

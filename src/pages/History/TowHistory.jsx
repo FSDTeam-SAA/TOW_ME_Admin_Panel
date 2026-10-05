@@ -1,5 +1,6 @@
+import SelectField from '../../components/common/SelectField'
 import React, { useCallback, useMemo, useState } from 'react'
-import { CalendarDays, ChevronDown, Download, Search, UserPlus, X, XCircle } from 'lucide-react'
+import { CalendarDays, Download, Search, UserPlus, X, XCircle } from 'lucide-react'
 import PageState from '../../components/common/PageState'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { api } from '../../api/client'
@@ -104,13 +105,12 @@ export default function TowHistory() {
     <section className="panel driver-toolbar">
       <button className="outline" onClick={exportRows}><Download size={17} />{t.export}</button>
       <label>
-        <select value={filters.status} onChange={(event) => update('status', event.target.value)}>
+        <SelectField aria-label={t.allStatuses} value={filters.status} onChange={(event) => update('status', event.target.value)}>
           <option value="all">{t.allStatuses}</option>
           {TRIP_STATUSES.map((status) => (
             <option value={status} key={status}>{statusLabel(status, t)}</option>
           ))}
-        </select>
-        <ChevronDown size={16} />
+        </SelectField>
       </label>
       <label className="date-field">
         <CalendarDays size={16} />
@@ -240,14 +240,14 @@ function AssignDialog({ trip, t, busy, onCancel, onConfirm }) {
       <b className="confirm-subject">#{trip.tripNumber}</b>
       <label>
         <span>{t.selectDriver}</span>
-        <select value={driverId} onChange={(event) => setDriverId(event.target.value)} required>
+        <SelectField value={driverId} onChange={(event) => setDriverId(event.target.value)} required>
           <option value="">{loading ? t.loading : t.selectDriver}</option>
           {options.map((driver) => (
             <option value={driver._id} key={driver._id}>
               {driverName(driver)} · {driver.phoneNumber}
             </option>
           ))}
-        </select>
+        </SelectField>
       </label>
       <div className="confirm-actions">
         <button type="button" className="outline" onClick={onCancel}>{t.close}</button>

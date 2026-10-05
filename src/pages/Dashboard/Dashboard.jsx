@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Trophy, X } from 'lucide-react'
 import Avatar from '../../components/common/Avatar'
 import { useLanguage } from '../../i18n/LanguageContext'
@@ -12,9 +12,9 @@ import { asset } from '../../utils/asset'
 const dashboardIcons = ['truck.png', 'isrial_currency.png', 'tikmark.png', 'star.png']
 const LIVE_EVENTS = ['trip:created', 'trip:updated', 'driver:updated']
 
-function DetailField({ label, value }) {
+function DetailField({ label, value, wide = false }) {
   if (value === undefined || value === null || value === '') return null
-  return <div><small>{label}</small><b>{value}</b></div>
+  return <div className={wide ? 'trip-details-wide' : undefined}><small>{label}</small><b dir="auto">{value}</b></div>
 }
 
 function MetricIcon({ index }) {
@@ -84,6 +84,24 @@ export default function Dashboard({ onManageDrivers }) {
   const [chartPeriod, setChartPeriod] = useState('week')
   const [selectedTrip, setSelectedTrip] = useState(null)
   const [detailError, setDetailError] = useState('')
+  const modalCloseRef = useRef(null)
+
+  useEffect(() => {
+    if (!selectedTrip) return
+    const previousOverflow = document.body.style.overflow
+    const previousFocus = document.activeElement
+    document.body.style.overflow = 'hidden'
+    modalCloseRef.current?.focus()
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setSelectedTrip(null)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', onKeyDown)
+      previousFocus?.focus()
+    }
+  }, [selectedTrip])
 
   const openTrip = async (id) => {
     setDetailError('')
@@ -184,9 +202,10 @@ export default function Dashboard({ onManageDrivers }) {
       </article>
     </section>
     {detailError && <div className="login-error">{detailError}</div>}
-    {selectedTrip && <div className="driver-modal-backdrop" onMouseDown={() => setSelectedTrip(null)}>
-      <div className="driver-modal" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="driver-modal-head"><h2>#{selectedTrip.tripNumber}</h2><button onClick={() => setSelectedTrip(null)}><X /></button></div>
+    {selectedTrip && <div className="driver-modal-backdrop trip-details-backdrop" onMouseDown={() => setSelectedTrip(null)}>
+      <div className="driver-modal trip-details-modal" role="dialog" aria-modal="true" aria-labelledby="trip-details-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="driver-modal-head"><h2 id="trip-details-title">#{selectedTrip.tripNumber}</h2><button ref={modalCloseRef} type="button" aria-label={language === 'he' ? 'סגור' : 'Close'} onClick={() => setSelectedTrip(null)}><X /></button></div>
+        <div className="trip-details-body">
         <div className="detail-grid">
           <div><small>{t.cmHeaders[1]}</small><b>{selectedTrip.customerId?.name || '—'}</b></div>
           <DetailField label={t.towDetail.contactName} value={selectedTrip.contactInfo?.name || selectedTrip.customerId?.name} />
@@ -215,9 +234,9 @@ export default function Dashboard({ onManageDrivers }) {
           <DetailField label={t.towDetail.completedAt} value={selectedTrip.completedAt && formatDateTime(selectedTrip.completedAt)} />
           <DetailField label={t.towDetail.cancelledAt} value={selectedTrip.cancelledAt && formatDateTime(selectedTrip.cancelledAt)} />
           <DetailField label={t.towDetail.cancellationFee} value={selectedTrip.cancellationFee ? formatIls(selectedTrip.cancellationFee) : null} />
-          <DetailField label={t.towDetail.cancellationReason} value={selectedTrip.cancellationReason} />
-          <DetailField label={t.towDetail.notes} value={selectedTrip.notes} />
-          <DetailField label={t.towDetail.completionComments} value={selectedTrip.completionReport?.comments} />
+          <DetailField label={t.towDetail.cancellationReason} value={selectedTrip.cancellationReason} wide />
+          <DetailField label={t.towDetail.notes} value={selectedTrip.notes} wide />
+          <DetailField label={t.towDetail.completionComments} value={selectedTrip.completionReport?.comments} wide />
         </div>
         {selectedTrip.destinationHistory?.length > 0 && <div className="driver-trip-history">
           <h3 className="detail-section">{t.towDetail.destinationHistory}</h3>
@@ -225,6 +244,7 @@ export default function Dashboard({ onManageDrivers }) {
             {entry.address} · {formatIls(entry.price)} · {entry.changedAt ? formatDateTime(entry.changedAt) : ''}
           </p>)}
         </div>}
+        </div>
       </div>
     </div>}
   </div>

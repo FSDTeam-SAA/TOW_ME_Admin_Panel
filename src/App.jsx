@@ -5,6 +5,7 @@ import DriverManagement from './pages/Drivers/DriverManagement'
 import FinancialData from './pages/Finance/FinancialData'
 import TowHistory from './pages/History/TowHistory'
 import Settings from './pages/Settings/Settings'
+import TermsEditor from './pages/Settings/TermsEditor'
 import CustomerSupport from './pages/CustomerSupport/CustomerSupport'
 import Customers from './pages/Customers/Customers'
 import Login from './pages/Login/Login'
@@ -15,7 +16,7 @@ export default function App() {
   const { user, logout } = useAuth()
   const [page, setPage] = useState(() => {
     const requestedPage = new URLSearchParams(window.location.search).get('page')
-    return ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support'].includes(requestedPage)
+    return ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'terms', 'support'].includes(requestedPage)
       ? requestedPage
       : 'dashboard'
   })
@@ -29,9 +30,9 @@ export default function App() {
   if (!user) return <Login />
 
   const allowedPages = user.mustChangePin ? ['settings'] : user.isMasterAdmin
-    ? ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support']
-    : ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'support']
-      .filter((item) => item === 'settings' || (user.adminPermissions || []).includes({ history: 'trips' }[item] || item))
+    ? ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'terms', 'support']
+    : ['dashboard', 'drivers', 'finance', 'history', 'customers', 'settings', 'terms', 'support']
+      .filter((item) => item === 'settings' || (user.adminPermissions || []).includes({ history: 'trips', terms: 'settings' }[item] || item))
   const currentPage = allowedPages.includes(page) ? page : allowedPages[0]
   if (!currentPage) return <div className="login-page"><div className="login-card panel">
     <p>No administrator permissions have been granted yet.</p>
@@ -40,6 +41,7 @@ export default function App() {
 
   const pages = {
     settings: <Settings />,
+    terms: <div className="content terms-page"><TermsEditor /></div>,
     drivers: <DriverManagement initialDriverId={focusedDriverId} />,
     finance: <FinancialData />,
     history: <TowHistory />,
